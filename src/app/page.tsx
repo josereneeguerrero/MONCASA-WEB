@@ -6,6 +6,14 @@ import Footer from '@/components/footer';
 export const dynamic = 'force-dynamic';
 
 type ProductRow = Record<string, unknown>;
+type ConfigRow = { clave: string; valor: string };
+type PromoRow = {
+  tag: string;
+  titulo: string;
+  descripcion: string;
+  badge: string;
+  link: string;
+};
 
 const fallbackProducts = [
   {
@@ -97,6 +105,41 @@ function resolveProducts(rows: ProductRow[]) {
     .slice(0, 6);
 }
 
+function toConfigMap(rows: ConfigRow[]) {
+  const map = new Map<string, string>();
+
+  for (const row of rows) {
+    map.set(String(row.clave ?? ''), String(row.valor ?? ''));
+  }
+
+  return map;
+}
+
+function parsePromos(value: string | undefined): PromoRow[] {
+  if (!value) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(value) as PromoRow[];
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed
+      .map((item) => ({
+        tag: String(item.tag ?? 'Promoción'),
+        titulo: String(item.titulo ?? 'Oferta especial'),
+        descripcion: String(item.descripcion ?? 'Consulta más detalles de esta promoción.'),
+        badge: String(item.badge ?? 'Disponible'),
+        link: String(item.link ?? '/productos'),
+      }))
+      .slice(0, 3);
+  } catch {
+    return [];
+  }
+}
+
 export default async function Home() {
   const productsTable = process.env.NEXT_PUBLIC_SUPABASE_PRODUCTS_TABLE ?? 'productos';
 
@@ -107,6 +150,59 @@ export default async function Home() {
   if (!error && Array.isArray(data)) {
     products = resolveProducts(data as ProductRow[]);
   }
+
+  const { data: rawConfig } = await supabase
+    .from('configuracion_sitio')
+    .select('clave,valor')
+    .in('clave', [
+      'hero_subtitulo',
+      'hero_titulo',
+      'hero_cta_text',
+      'hero_cta_link',
+      'banner_activo',
+      'banner_texto',
+      'banner_tipo',
+      'banner_link',
+      'promos_home',
+    ]);
+
+  const config = toConfigMap((Array.isArray(rawConfig) ? rawConfig : []) as ConfigRow[]);
+
+  const heroSubtitulo = config.get('hero_subtitulo') || 'Bienvenido';
+  const heroTitulo = config.get('hero_titulo') || 'Tu aliado confiable en construcción y hogar';
+  const heroCtaText = config.get('hero_cta_text') || 'Catálogo de productos';
+  const heroCtaLink = config.get('hero_cta_link') || '/productos';
+  const bannerTexto = config.get('banner_texto') || '';
+  const bannerLink = config.get('banner_link') || '/contacto';
+  const bannerTipo = (config.get('banner_tipo') || 'info').toLowerCase();
+  const bannerActivo = toBoolean(config.get('banner_activo'), false);
+
+  const promos = parsePromos(config.get('promos_home'));
+  const promoRows = promos.length
+    ? promos
+    : [
+        {
+          tag: 'Oferta',
+          titulo: 'Herramientas profesionales',
+          descripcion: 'Precios especiales en combos de herramientas y accesorios.',
+          badge: 'Disponible hoy',
+          link: '/productos',
+        },
+        {
+          tag: 'Temporada',
+          titulo: 'Pinturas y acabados',
+          descripcion: 'Líneas para interior y exterior con asesoría personalizada.',
+          badge: 'Nuevo',
+          link: '/productos',
+        },
+      ];
+
+  const bannerStyleByType: Record<string, string> = {
+    info: 'border-[#FE9A01]/30 bg-[#FE9A01]/10 text-[var(--color-moncasa-text)]',
+    success: 'border-green-500/30 bg-green-500/10 text-[var(--color-moncasa-text)]',
+    warning: 'border-amber-500/30 bg-amber-500/10 text-[var(--color-moncasa-text)]',
+    error: 'border-red-500/30 bg-red-500/10 text-[var(--color-moncasa-text)]',
+  };
 
   return (
     <main className="min-h-screen bg-[var(--color-moncasa-page-bg)] px-4 py-4 sm:px-6 lg:px-8">
@@ -128,11 +224,20 @@ export default async function Home() {
         </header>
 
         <main id="inicio" className="px-5 py-8 sm:px-8 sm:py-10 flex-1">
+          {bannerActivo && bannerTexto ? (
+            <Link
+              href={bannerLink}
+              className={`mb-6 block rounded-2xl border px-4 py-3 text-sm font-semibold transition hover:brightness-95 ${bannerStyleByType[bannerTipo] ?? bannerStyleByType.info}`}
+            >
+              {bannerTexto}
+            </Link>
+          ) : null}
+
           <section className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
             <div className="space-y-6 moncasa-fade-in-up" style={{ animationDelay: '100ms' }}>
-              <p className="text-sm font-bold uppercase tracking-[0.35em] text-[#FE9A01] moncasa-fade-in" style={{ animationDelay: '200ms' }}>Bienvenido</p>
+              <p className="text-sm font-bold uppercase tracking-[0.35em] text-[#FE9A01] moncasa-fade-in" style={{ animationDelay: '200ms' }}>{heroSubtitulo}</p>
               <h1 className="max-w-xl text-5xl sm:text-6xl font-black leading-[0.95] tracking-tight text-[var(--color-moncasa-text)] moncasa-fade-in-up" style={{ animationDelay: '300ms' }}>
-                Tu aliado confiable en construcción y hogar
+                {heroTitulo}
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-[var(--color-moncasa-muted)] moncasa-fade-in" style={{ animationDelay: '400ms' }}>
                 Productos de calidad y asesoría profesional en San Lorenzo, Honduras.
@@ -140,10 +245,10 @@ export default async function Home() {
 
               <div className="flex flex-wrap gap-4 pt-2 moncasa-fade-in" style={{ animationDelay: '500ms' }}>
                 <Link
-                  href="/productos"
+                  href={heroCtaLink}
                   className="rounded-full bg-[#FE9A01] px-6 py-3 text-sm font-bold text-[#0A1116] transition hover:brightness-95 hover:shadow-lg"
                 >
-                  Catálogo de productos
+                  {heroCtaText}
                 </Link>
                 <Link href="/contacto" className="rounded-full border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] px-6 py-3 text-sm font-bold text-[var(--color-moncasa-text)] transition hover:bg-[var(--color-moncasa-surface-soft)] hover:border-[#FE9A01]/50">
                   Contactate con nosotros
@@ -156,29 +261,30 @@ export default async function Home() {
               <div className="relative space-y-4">
                 <div className="flex items-center justify-between text-white/70">
                   <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#FE9A01]">Promociones destacadas</p>
-                  <span className="rounded-full border border-[#FE9A01]/30 bg-[#FE9A01]/10 px-3 py-1 text-xs font-semibold text-[#FE9A01]">Disponible hoy</span>
+                  <span className="rounded-full border border-[#FE9A01]/30 bg-[#FE9A01]/10 px-3 py-1 text-xs font-semibold text-[#FE9A01]">Actualizado desde admin</span>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-[1.5rem] border border-[#FE9A01]/30 bg-gradient-to-br from-[#FE9A01]/15 to-[#FE9A01]/5 p-4 text-white hover:border-[#FE9A01]/60 hover:bg-[#FE9A01]/10 transition">
-                    <p className="text-sm text-white/60 font-medium">Categoría destacada</p>
-                    <p className="mt-2 text-2xl font-black">Herramientas</p>
-                    <p className="mt-1 text-sm text-white/70">Descuentos especiales en herramientas y accesorios de construcción.</p>
-                  </div>
-                  <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4 text-white hover:border-white/30 hover:bg-white/10 transition">
-                    <p className="text-sm text-white/60 font-medium">Lo más solicitado</p>
-                    <p className="mt-2 text-2xl font-black">Pinturas</p>
-                    <p className="mt-1 text-sm text-white/70">Pinturas, acabados, selladores y accesorios de aplicación.</p>
-                  </div>
+                  {promoRows.slice(0, 2).map((promo, idx) => (
+                    <Link
+                      key={`${promo.titulo}-${idx}`}
+                      href={promo.link || '/productos'}
+                      className={`rounded-[1.5rem] p-4 text-white transition ${
+                        idx === 0
+                          ? 'border border-[#FE9A01]/30 bg-gradient-to-br from-[#FE9A01]/15 to-[#FE9A01]/5 hover:border-[#FE9A01]/60 hover:bg-[#FE9A01]/10'
+                          : 'border border-white/10 bg-white/5 hover:border-white/30 hover:bg-white/10'
+                      }`}
+                    >
+                      <p className="text-sm text-white/60 font-medium">{promo.tag}</p>
+                      <p className="mt-2 text-2xl font-black">{promo.titulo}</p>
+                      <p className="mt-1 text-sm text-white/70">{promo.descripcion}</p>
+                    </Link>
+                  ))}
                 </div>
 
                 <div className="rounded-[1.5rem] border border-white/10 bg-gradient-to-r from-[#FE9A01] via-[#ffb52d] to-[#ffd37a] p-4 text-[#0A1116] hover:shadow-lg transition">
-                  <p className="text-sm font-bold uppercase tracking-[0.2em]">Descubre todas nuestras ofertas</p>
-                  <div className="mt-4 grid grid-cols-3 gap-3">
-                    <div className="aspect-square rounded-2xl bg-white/60 hover:bg-white/80 transition" />
-                    <div className="aspect-square rounded-2xl bg-white/30 hover:bg-white/50 transition" />
-                    <div className="aspect-square rounded-2xl bg-white/20 hover:bg-white/40 transition" />
-                  </div>
+                  <p className="text-sm font-bold uppercase tracking-[0.2em]">{promoRows[0]?.badge ?? 'Promociones activas'}</p>
+                  <p className="mt-2 text-sm">Edita estas promociones desde Admin → Configuración → clave `promos_home`.</p>
                 </div>
               </div>
             </div>

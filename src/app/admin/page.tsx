@@ -154,6 +154,7 @@ export default function AdminPage() {
   const [roleFilter, setRoleFilter] = useState<AdminRoleFilter>('all');
   const [roleStatusFilter, setRoleStatusFilter] = useState<AdminRoleStatusFilter>('all');
   const [roleActionId, setRoleActionId] = useState<string | number | null>(null);
+  const [invitingEmail, setInvitingEmail] = useState<string | null>(null);
   const [backupName, setBackupName] = useState('');
 
   const productsTable = useMemo(
@@ -1160,6 +1161,55 @@ export default function AdminPage() {
     void logAudit('rol', 'admin', `Se eliminó el acceso de ${roleItem.email}`);
     setMessage('✓ Acceso eliminado correctamente.');
     setRoleActionId(null);
+    clearMessage();
+  }
+
+  async function handleInviteAccess(emailInput: string) {
+    if (!canManageRoles) {
+      setMessage('Solo el propietario puede enviar invitaciones.');
+      clearMessage();
+      return;
+    }
+
+    const email = emailInput.trim().toLowerCase();
+
+    if (!email) {
+      setMessage('Ingresa un correo válido para enviar invitación.');
+      clearMessage();
+      return;
+    }
+
+    const headers = await getAdminRequestHeaders();
+
+    if (!headers) {
+      setMessage('Debes iniciar sesión de nuevo para enviar invitaciones.');
+      clearMessage();
+      return;
+    }
+
+    setInvitingEmail(email);
+
+    const response = await fetch('/api/admin/invite', {
+      method: 'POST',
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+
+    if (!response.ok) {
+      setMessage(payload?.error ?? 'No se pudo enviar la invitación.');
+      setInvitingEmail(null);
+      clearMessage();
+      return;
+    }
+
+    void logAudit('rol', 'admin', `Se envió invitación de acceso a ${email}`);
+    setMessage(`✓ Invitación enviada a ${email}. Debe revisar su correo para crear contraseña.`);
+    setInvitingEmail(null);
     clearMessage();
   }
 
@@ -2537,6 +2587,9 @@ export default function AdminPage() {
               <p className="mt-2 text-sm text-[var(--color-moncasa-muted)]">
                 Define qué correos pueden administrar el panel y su nivel de acceso.
               </p>
+              <p className="mt-2 text-xs text-[var(--color-moncasa-muted)]">
+                Importante: asignar un rol no crea contraseña. Usa &quot;Enviar invitación&quot; para que el usuario reciba correo y defina su acceso.
+              </p>
 
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-3">
@@ -2606,6 +2659,16 @@ export default function AdminPage() {
                   className="rounded-xl bg-[#FE9A01] px-4 py-2 text-sm font-bold text-[#0A1116] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Guardar
+                </button>
+              </div>
+              <div className="mt-2 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => void handleInviteAccess(newAdminEmail)}
+                  disabled={!canManageRoles || !newAdminEmail.trim() || invitingEmail === newAdminEmail.trim().toLowerCase()}
+                  className="rounded-xl border border-[var(--color-moncasa-border)] px-4 py-2 text-xs font-semibold text-[var(--color-moncasa-text)] transition hover:bg-[var(--color-moncasa-hover)] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {invitingEmail === newAdminEmail.trim().toLowerCase() ? 'Enviando...' : 'Enviar invitación al correo'}
                 </button>
               </div>
 
@@ -2704,6 +2767,14 @@ export default function AdminPage() {
                             className="rounded-lg bg-red-600/20 px-3 py-1 text-xs font-semibold text-red-400 transition hover:bg-red-600/30 disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             Quitar acceso
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void handleInviteAccess(roleItem.email)}
+                            disabled={!canManageRoles || invitingEmail === roleItem.email.trim().toLowerCase()}
+                            className="rounded-lg border border-[var(--color-moncasa-border)] px-3 py-1 text-xs font-semibold text-[var(--color-moncasa-text)] transition hover:bg-[var(--color-moncasa-hover)] disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {invitingEmail === roleItem.email.trim().toLowerCase() ? 'Enviando...' : 'Enviar invitación'}
                           </button>
                         </div>
                       ) : (

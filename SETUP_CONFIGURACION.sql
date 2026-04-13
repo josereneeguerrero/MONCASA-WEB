@@ -40,11 +40,24 @@ VALUES
   ('nombre_empresa', 'Ferretería Moncasa', 'texto', 'Nombre oficial de la empresa', 'SYSTEM'),
   ('slogan', 'Tu aliado confiable', 'texto', 'Slogan principal', 'SYSTEM'),
   ('descripcion_corta', 'Ferretería especializada en materiales de construcción y mejora del hogar', 'texto', 'Meta descripción del sitio', 'SYSTEM'),
+  ('meta_title_home', 'Ferretería Moncasa | Inicio', 'texto', 'Meta título para la página principal', 'SYSTEM'),
+  ('meta_description_home', 'Encuentra herramientas, materiales de construcción y asesoría profesional en Ferretería Moncasa.', 'texto', 'Meta descripción para la página principal', 'SYSTEM'),
+  ('meta_keywords_home', 'ferreteria, herramientas, construccion, San Lorenzo, Honduras', 'texto', 'Keywords SEO para la página principal', 'SYSTEM'),
   
   -- Anuncio/Banner
   ('banner_activo', 'false', 'numero', 'Mostrar banner de anuncio (1=sí, 0=no)', 'SYSTEM'),
   ('banner_texto', '', 'texto', 'Texto del banner de anuncio', 'SYSTEM'),
-  ('banner_tipo', 'info', 'texto', 'Tipo de banner: info, warning, success, error', 'SYSTEM')
+  ('banner_tipo', 'info', 'texto', 'Tipo de banner: info, warning, success, error', 'SYSTEM'),
+  ('banner_link', '/contacto', 'url', 'Enlace opcional del banner', 'SYSTEM'),
+
+  -- Promociones dinámicas en home
+  (
+    'promos_home',
+    '[{"tag":"Oferta","titulo":"Herramientas profesionales","descripcion":"Precios especiales en combos de herramientas y accesorios.","badge":"Disponible hoy","link":"/productos"},{"tag":"Temporada","titulo":"Pinturas y acabados","descripcion":"Líneas para interior y exterior con asesoría personalizada.","badge":"Nuevo","link":"/productos"},{"tag":"Cotiza","titulo":"Atención para contratistas","descripcion":"Solicita cotización por volumen para obra y mantenimiento.","badge":"Empresas","link":"/contacto"}]',
+    'json',
+    'Listado de promociones para la portada',
+    'SYSTEM'
+  )
 ON CONFLICT (clave) DO NOTHING;
 
 -- RLS Policy

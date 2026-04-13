@@ -4,9 +4,6 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import BrandLogo from '@/components/brand-logo';
-import { useConfig } from '@/lib/useConfig';
-
-const { get } = useConfig();
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,6 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('Inicia sesión para acceder al panel.');
   const [loading, setLoading] = useState(false);
+  const [sendingReset, setSendingReset] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -44,6 +42,30 @@ export default function LoginPage() {
     router.replace('/admin');
   };
 
+  const onSendReset = async () => {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail) {
+      setMessage('Ingresa tu correo para enviar el enlace de recuperación.');
+      return;
+    }
+
+    setSendingReset(true);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+      redirectTo: `${window.location.origin}/login`,
+    });
+
+    if (error) {
+      setMessage(`No se pudo enviar el correo: ${error.message}`);
+      setSendingReset(false);
+      return;
+    }
+
+    setMessage('Revisa tu correo para definir o restablecer la contraseña.');
+    setSendingReset(false);
+  };
+
   return (
     <main className="min-h-screen bg-[var(--color-moncasa-page-bg)] text-[var(--color-moncasa-text)]">
       <section className="mx-auto flex min-h-screen max-w-md items-center px-6">
@@ -54,7 +76,7 @@ export default function LoginPage() {
               Ferretería Moncasa
             </p>
           </div>
-          <h1>{get('hero_titulo')}</h1>
+          <h1 className="mt-3 text-3xl font-semibold">Acceso administrativo</h1>
           <p className="mt-3 text-sm text-[var(--color-moncasa-muted)]">{message}</p>
 
           <form className="mt-6 space-y-4" onSubmit={onSubmit}>
@@ -78,6 +100,14 @@ export default function LoginPage() {
               className="w-full rounded-xl bg-[#FE9A01] px-4 py-3 font-semibold text-[#0A1116] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? 'Entrando...' : 'Entrar'}
+            </button>
+            <button
+              type="button"
+              onClick={() => void onSendReset()}
+              disabled={sendingReset}
+              className="w-full rounded-xl border border-[var(--color-moncasa-border)] px-4 py-3 text-sm font-semibold text-[var(--color-moncasa-text)] transition hover:bg-[var(--color-moncasa-surface-soft)] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {sendingReset ? 'Enviando enlace...' : 'Definir o recuperar contraseña'}
             </button>
           </form>
         </div>

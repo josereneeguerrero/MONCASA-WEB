@@ -18,7 +18,9 @@ export type ConfigKey =
   | 'horario_lunes_viernes' | 'horario_sabado' | 'horario_domingo'
   | 'facebook' | 'youtube' | 'instagram'
   | 'nombre_empresa' | 'slogan' | 'descripcion_corta'
-  | 'banner_activo' | 'banner_texto' | 'banner_tipo';
+  | 'banner_activo' | 'banner_texto' | 'banner_tipo' | 'banner_link'
+  | 'promos_home'
+  | 'meta_title_home' | 'meta_description_home' | 'meta_keywords_home';
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 const configCache: Record<string, string> = {};
