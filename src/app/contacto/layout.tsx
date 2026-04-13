@@ -1,10 +1,23 @@
 import type { Metadata } from 'next';
+import { supabase } from '@/lib/supabase';
 
-export const metadata: Metadata = {
-  title: 'Contacto',
-  description:
-    'Contacta a Ferretería Moncasa en San Lorenzo, Cortés. Escríbenos para cotizaciones y asesoría.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const fallbackAddress = 'Barrio Mongollano, San Lorenzo, Valle 02501';
+
+  const { data } = await supabase
+    .from('configuracion_sitio')
+    .select('clave,valor')
+    .in('clave', ['direccion_completa']);
+
+  const address = Array.isArray(data)
+    ? String(data.find((item) => item.clave === 'direccion_completa')?.valor || fallbackAddress)
+    : fallbackAddress;
+
+  return {
+    title: 'Contacto',
+    description: `Contacta a Ferretería Moncasa en ${address}. Escríbenos para cotizaciones y asesoría.`,
+  };
+}
 
 export default function ContactoLayout({ children }: { children: React.ReactNode }) {
   return children;

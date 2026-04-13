@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import BrandLogo from '@/components/brand-logo';
 import Footer from '@/components/footer';
+import { useConfig } from '@/lib/useConfig';
 import { contactSchema } from '@/lib/validation';
 
 type FormData = {
@@ -24,9 +25,23 @@ const emptyForm: FormData = {
 };
 
 export default function ContactoPage() {
+  const { get } = useConfig();
   const [form, setForm] = useState<FormData>(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
+
+  const direccionCompleta = get(
+    'direccion_completa',
+    'Cuadra al este de la cancha de futbol, Barrio Mongollano, 1, San Lorenzo, Valle 02501, Honduras',
+  );
+  const mapsEmbedUrl = get(
+    'maps_embed_url',
+    'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d2383.5608431996366!2d-87.44923979211929!3d13.441320123221287!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8f7003d65b2caf1d%3A0x616240c6c9b3b9e2!2sFerreteria%20Moncasa!5e0!3m2!1ses!2shn!4v1776065705037!5m2!1ses!2shn',
+  );
+  const mapsLinkUrl = get(
+    'maps_link_url',
+    'https://maps.google.com/?q=Ferreteria+Moncasa+San+Lorenzo+Valle+02501',
+  );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -198,15 +213,11 @@ export default function ContactoPage() {
               {/* TARJETA: UBICACIÓN */}
               <div className="rounded-[1.75rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)]/50 p-6">
                 <h3 className="text-lg font-black text-[var(--color-moncasa-text)]">Ubicación</h3>
-                <p className="mt-3 text-[var(--color-moncasa-muted)]">
-                  San Lorenzo, Cortés
-                  <br />
-                  Honduras
-                </p>
+                <p className="mt-3 text-[var(--color-moncasa-muted)]">{direccionCompleta}</p>
                 <div className="mt-4 overflow-hidden rounded-xl border border-[var(--color-moncasa-border)]">
                   <iframe
                     title="Mapa Ferretería Moncasa"
-                    src="https://www.google.com/maps?q=San+Lorenzo,+Cortes,+Honduras&output=embed"
+                    src={mapsEmbedUrl}
                     width="100%"
                     height="220"
                     loading="lazy"
@@ -215,7 +226,7 @@ export default function ContactoPage() {
                   />
                 </div>
                 <a
-                  href="https://maps.google.com/?q=San+Lorenzo+Cortes+Honduras"
+                  href={mapsLinkUrl}
                   target="_blank"
                   rel="noreferrer"
                   className="mt-4 inline-flex items-center rounded-lg bg-[#FE9A01]/20 px-4 py-2 text-sm font-semibold text-[#FE9A01] transition hover:bg-[#FE9A01]/30"

@@ -1,6 +1,14 @@
+"use client";
+
 import Link from 'next/link';
+import { useConfig } from '@/lib/useConfig';
 
 export default function Footer() {
+  const { get } = useConfig();
+  const telefono = get('telefono', '+504 3218-4060');
+  const telefonoHref = `tel:${telefono.replace(/[^\d+]/g, '')}`;
+  const ubicacion = get('ubicacion', 'San Lorenzo, Valle 02501, Honduras');
+
   return (
     <footer className="border-t border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-inverse-surface)] px-6 py-12 text-[var(--color-moncasa-inverse-text)] sm:px-8">
       <div className="mx-auto max-w-7xl">
@@ -11,13 +19,13 @@ export default function Footer() {
             <div className="mt-6 space-y-4">
               <div>
                 <p className="text-sm text-[var(--color-moncasa-inverse-muted)]">Teléfono</p>
-                <a href="tel:+50432184060" className="text-lg font-bold text-[#FE9A01] hover:underline transition">
-                  +504 3218-4060
+                <a href={telefonoHref} className="text-lg font-bold text-[#FE9A01] hover:underline transition">
+                  {telefono}
                 </a>
               </div>
               <div>
                 <p className="text-sm text-[var(--color-moncasa-inverse-muted)]">Ubicación</p>
-                <p className="text-base font-semibold text-[var(--color-moncasa-inverse-text)]">San Lorenzo, Honduras</p>
+                <p className="text-base font-semibold text-[var(--color-moncasa-inverse-text)]">{ubicacion}</p>
               </div>
             </div>
 

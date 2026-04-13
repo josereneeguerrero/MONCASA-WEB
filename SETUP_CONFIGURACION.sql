@@ -24,7 +24,10 @@ VALUES
   ('telefono', '+504 3218-4060', 'texto', 'Teléfono principal', 'SYSTEM'),
   ('whatsapp', '50432184060', 'texto', 'Número WhatsApp (sin caracteres especiales)', 'SYSTEM'),
   ('email_contacto', 'info@moncasa.hn', 'email', 'Email de contacto', 'SYSTEM'),
-  ('ubicacion', 'San Lorenzo, Honduras', 'texto', 'Ubicación física', 'SYSTEM'),
+  ('ubicacion', 'San Lorenzo, Valle 02501, Honduras', 'texto', 'Ubicación física', 'SYSTEM'),
+  ('direccion_completa', 'Cuadra al este de la cancha de futbol, Barrio Mongollano, 1, San Lorenzo, Valle 02501, Honduras', 'texto', 'Dirección completa del negocio', 'SYSTEM'),
+  ('maps_embed_url', 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d2383.5608431996366!2d-87.44923979211929!3d13.441320123221287!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8f7003d65b2caf1d%3A0x616240c6c9b3b9e2!2sFerreteria%20Moncasa!5e0!3m2!1ses!2shn!4v1776065705037!5m2!1ses!2shn', 'url', 'URL embed del mapa en contacto', 'SYSTEM'),
+  ('maps_link_url', 'https://maps.google.com/?q=Ferreteria+Moncasa+San+Lorenzo+Valle+02501', 'url', 'URL pública para abrir mapa en pestaña nueva', 'SYSTEM'),
   
   -- Horarios
   ('horario_lunes_viernes', '7am - 6pm', 'texto', 'Horario lunes a viernes', 'SYSTEM'),
@@ -42,7 +45,7 @@ VALUES
   ('descripcion_corta', 'Ferretería especializada en materiales de construcción y mejora del hogar', 'texto', 'Meta descripción del sitio', 'SYSTEM'),
   ('meta_title_home', 'Ferretería Moncasa | Inicio', 'texto', 'Meta título para la página principal', 'SYSTEM'),
   ('meta_description_home', 'Encuentra herramientas, materiales de construcción y asesoría profesional en Ferretería Moncasa.', 'texto', 'Meta descripción para la página principal', 'SYSTEM'),
-  ('meta_keywords_home', 'ferreteria, herramientas, construccion, San Lorenzo, Honduras', 'texto', 'Keywords SEO para la página principal', 'SYSTEM'),
+  ('meta_keywords_home', 'ferreteria, herramientas, construccion, San Lorenzo, Valle, Honduras', 'texto', 'Keywords SEO para la página principal', 'SYSTEM'),
   
   -- Anuncio/Banner
   ('banner_activo', 'false', 'numero', 'Mostrar banner de anuncio (1=sí, 0=no)', 'SYSTEM'),
@@ -62,6 +65,11 @@ ON CONFLICT (clave) DO NOTHING;
 
 -- RLS Policy
 ALTER TABLE configuracion_sitio ENABLE ROW LEVEL SECURITY;
+
+-- Re-ejecutable sin errores
+DROP POLICY IF EXISTS "configuracion_public_read" ON configuracion_sitio;
+DROP POLICY IF EXISTS "configuracion_admin_write" ON configuracion_sitio;
+DROP POLICY IF EXISTS "configuracion_admin_insert" ON configuracion_sitio;
 
 -- Permitir lectura pública
 CREATE POLICY "configuracion_public_read" ON configuracion_sitio

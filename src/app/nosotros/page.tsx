@@ -27,7 +27,7 @@ export default function NosotrosPage() {
             <p className="text-sm font-bold uppercase tracking-[0.35em] text-[#FE9A01]">Nosotros</p>
             <h1 className="mt-2 text-4xl font-black tracking-tight text-[var(--color-moncasa-text)] sm:text-5xl">Servicio cercano, solución rápida.</h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--color-moncasa-muted)]">
-              Ferretería Moncasa acompaña a clientes, maestros y contratistas en San Lorenzo con orientación práctica para construir, reparar y mejorar.
+              Ferretería Moncasa acompaña a clientes, maestros y contratistas en San Lorenzo, Valle con orientación práctica para construir, reparar y mejorar.
             </p>
             <p className="mt-4 max-w-2xl text-[var(--color-moncasa-muted)]">
               Nuestra prioridad es mantener la esencia de la maqueta: comunicación clara, identidad fuerte y una experiencia visual limpia con acentos naranjas sobre fondo blanco y oscuro.

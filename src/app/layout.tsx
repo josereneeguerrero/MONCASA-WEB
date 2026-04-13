@@ -25,19 +25,19 @@ export const metadata: Metadata = {
     default: "Ferretería Moncasa",
     template: "%s | Ferretería Moncasa",
   },
-  description: "Tu aliado confiable en San Lorenzo para cada proyecto de construcción y hogar.",
+  description: "Tu aliado confiable en San Lorenzo, Valle para cada proyecto de construcción y hogar.",
   openGraph: {
     type: "website",
     siteName: "Ferretería Moncasa",
     title: "Ferretería Moncasa",
-    description: "Tu aliado confiable en San Lorenzo para cada proyecto de construcción y hogar.",
+    description: "Tu aliado confiable en San Lorenzo, Valle para cada proyecto de construcción y hogar.",
     locale: "es_HN",
     images: [{ url: "/moncasa-logo.png", width: 1200, height: 630, alt: "Ferretería Moncasa" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Ferretería Moncasa",
-    description: "Tu aliado confiable en San Lorenzo para cada proyecto de construcción y hogar.",
+    description: "Tu aliado confiable en San Lorenzo, Valle para cada proyecto de construcción y hogar.",
     images: ["/moncasa-logo.png"],
   },
   icons: {

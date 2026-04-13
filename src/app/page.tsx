@@ -240,7 +240,7 @@ export default async function Home() {
                 {heroTitulo}
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-[var(--color-moncasa-muted)] moncasa-fade-in" style={{ animationDelay: '400ms' }}>
-                Productos de calidad y asesoría profesional en San Lorenzo, Honduras.
+                Productos de calidad y asesoría profesional en San Lorenzo, Valle 02501, Honduras.
               </p>
 
               <div className="flex flex-wrap gap-4 pt-2 moncasa-fade-in" style={{ animationDelay: '500ms' }}>

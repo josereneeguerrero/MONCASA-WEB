@@ -14,7 +14,8 @@ export interface ConfigItem {
 
 export type ConfigKey = 
   | 'hero_titulo' | 'hero_subtitulo' | 'hero_cta_text' | 'hero_cta_link'
-  | 'telefono' | 'whatsapp' | 'email_contacto' | 'ubicacion'
+  | 'telefono' | 'whatsapp' | 'email_contacto' | 'ubicacion' | 'direccion_completa'
+  | 'maps_embed_url' | 'maps_link_url'
   | 'horario_lunes_viernes' | 'horario_sabado' | 'horario_domingo'
   | 'facebook' | 'youtube' | 'instagram'
   | 'nombre_empresa' | 'slogan' | 'descripcion_corta'
@@ -48,8 +49,7 @@ export function useConfig() {
       const { data, error: fetchError } = await supabase
         .from('configuracion_sitio')
         .select('clave, valor')
-        .eq('tipo', 'texto')
-        .or(`tipo.eq.url,tipo.eq.email,tipo.eq.numero`);
+        .in('tipo', ['texto', 'url', 'email', 'numero', 'json']);
 
       if (fetchError) {
         console.error('Error loading config:', fetchError);
