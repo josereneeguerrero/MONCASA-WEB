@@ -1137,6 +1137,11 @@ export default function AdminPage() {
               </div>
 
               <form onSubmit={handleUpdate} className="space-y-3">
+                <details open className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-3">
+                  <summary className="cursor-pointer list-none text-[11px] font-bold uppercase tracking-[0.25em] text-[#FE9A01]">
+                    Datos básicos
+                  </summary>
+                  <div className="mt-3 space-y-3">
                 <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
                   Categoría
                 </label>
@@ -1174,6 +1179,13 @@ export default function AdminPage() {
                   placeholder="Precio (L)"
                   className="w-full rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none placeholder:text-[var(--color-moncasa-muted)] focus:border-[#FE9A01]/50"
                 />
+                  </div>
+                </details>
+                <details className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-3">
+                  <summary className="cursor-pointer list-none text-[11px] font-bold uppercase tracking-[0.25em] text-[#FE9A01]">
+                    Inventario y visibilidad
+                  </summary>
+                  <div className="mt-3 space-y-3">
                 <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
                   Inventario (unidades)
                 </label>
@@ -1217,6 +1229,13 @@ export default function AdminPage() {
                     Destacado (aparece primero)
                   </label>
                 </div>
+                  </div>
+                </details>
+                <details className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-3">
+                  <summary className="cursor-pointer list-none text-[11px] font-bold uppercase tracking-[0.25em] text-[#FE9A01]">
+                    Imagen
+                  </summary>
+                  <div className="mt-3 space-y-3">
                 <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
                   Imagen del producto
                 </label>
@@ -1300,6 +1319,8 @@ export default function AdminPage() {
                     </div>
                   </div>
                 ) : null}
+                  </div>
+                </details>
 
                 <div className="flex gap-2 pt-3">
                   <button
@@ -1334,6 +1355,11 @@ export default function AdminPage() {
               </p>
 
               <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+                <details open className="rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4">
+                  <summary className="cursor-pointer list-none text-[11px] font-bold uppercase tracking-[0.25em] text-[#FE9A01]">
+                    Datos básicos
+                  </summary>
+                  <div className="mt-3 space-y-4">
                 <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
                   Categoría
                 </label>
@@ -1371,6 +1397,13 @@ export default function AdminPage() {
                   placeholder="Precio (L) *"
                   className="w-full rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-4 py-3 text-[var(--color-moncasa-text)] outline-none placeholder:text-[var(--color-moncasa-muted)] focus:border-[#FE9A01]/50"
                 />
+                  </div>
+                </details>
+                <details className="rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4">
+                  <summary className="cursor-pointer list-none text-[11px] font-bold uppercase tracking-[0.25em] text-[#FE9A01]">
+                    Inventario y visibilidad
+                  </summary>
+                  <div className="mt-3 space-y-4">
                 <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
                   Inventario (unidades)
                 </label>
@@ -1414,6 +1447,13 @@ export default function AdminPage() {
                     Producto destacado (primero)
                   </label>
                 </div>
+                  </div>
+                </details>
+                <details className="rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4">
+                  <summary className="cursor-pointer list-none text-[11px] font-bold uppercase tracking-[0.25em] text-[#FE9A01]">
+                    Imagen
+                  </summary>
+                  <div className="mt-3 space-y-4">
                 <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
                   Imagen del producto
                 </label>
@@ -1497,6 +1537,8 @@ export default function AdminPage() {
                     </div>
                   </div>
                 ) : null}
+                  </div>
+                </details>
 
                 <button
                   type="submit"
