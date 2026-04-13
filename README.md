@@ -36,6 +36,10 @@ NEXT_PUBLIC_SUPABASE_PRODUCTS_BUCKET=productos
 NEXT_PUBLIC_SUPABASE_CONTACTS_TABLE=contactos
 NEXT_PUBLIC_SITE_URL=https://tu-dominio.com
 NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+RESEND_API_KEY=re_...
+RESEND_FROM_EMAIL="Ferretería Moncasa <no-reply@tu-dominio.com>"
 ```
 
 ## Inventario (stock) en productos
@@ -158,6 +162,10 @@ npm run build
 - NEXT_PUBLIC_SUPABASE_CONTACTS_TABLE=contactos
 - NEXT_PUBLIC_SITE_URL=https://tu-dominio.com
 - NEXT_PUBLIC_GA_MEASUREMENT_ID (opcional)
+- NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+- CLERK_SECRET_KEY
+- RESEND_API_KEY
+- RESEND_FROM_EMAIL
 
 3. Base de datos en Supabase
 

@@ -4,6 +4,7 @@ import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } fro
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useClerk, useUser } from '@clerk/nextjs';
 import { supabase } from '@/lib/supabase';
 import BrandLogo from '@/components/brand-logo';
 import ConfigPanel from '@/components/config-panel';
@@ -116,6 +117,8 @@ const emptyForm: FormState = {
 
 export default function AdminPage() {
   const router = useRouter();
+  const { isLoaded, isSignedIn, user } = useUser();
+  const { signOut } = useClerk();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
@@ -616,19 +619,6 @@ export default function AdminPage() {
     setAuditDateFilter({ from: '', to: '' });
   }, []);
 
-  const getAdminRequestHeaders = useCallback(async () => {
-    const { data } = await supabase.auth.getSession();
-    const accessToken = data.session?.access_token;
-
-    if (!accessToken) {
-      return null;
-    }
-
-    return {
-      Authorization: `Bearer ${accessToken}`,
-    };
-  }, []);
-
   const loadAdminRoles = useCallback(async () => {
     const { data, error } = await supabase
       .from(rolesTable)
@@ -700,14 +690,16 @@ export default function AdminPage() {
   // EFECTOS
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase.auth.getSession();
+      if (!isLoaded) {
+        return;
+      }
 
-      if (!data.session) {
+      if (!isSignedIn || !user) {
         router.replace('/login');
         return;
       }
 
-      setCurrentUserEmail(data.session.user.email ?? '');
+      setCurrentUserEmail(user.primaryEmailAddress?.emailAddress ?? user.emailAddresses[0]?.emailAddress ?? '');
 
       await loadProducts();
       await loadMensajes();
@@ -718,7 +710,7 @@ export default function AdminPage() {
     };
 
     void load();
-  }, [router, loadProducts, loadMensajes, loadAuditLogs, loadAdminRoles, loadBackups]);
+  }, [isLoaded, isSignedIn, user, router, loadProducts, loadMensajes, loadAuditLogs, loadAdminRoles, loadBackups]);
 
   // HANDLERS
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -1179,22 +1171,10 @@ export default function AdminPage() {
       return;
     }
 
-    const headers = await getAdminRequestHeaders();
-
-    if (!headers) {
-      setMessage('Debes iniciar sesión de nuevo para enviar invitaciones.');
-      clearMessage();
-      return;
-    }
-
     setInvitingEmail(email);
 
     const response = await fetch('/api/admin/invite', {
       method: 'POST',
-      headers: {
-        ...headers,
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({ email }),
     });
 
@@ -1208,7 +1188,7 @@ export default function AdminPage() {
     }
 
     void logAudit('rol', 'admin', `Se envió invitación de acceso a ${email}`);
-    setMessage(`✓ Invitación enviada a ${email}. Debe revisar su correo para crear contraseña.`);
+    setMessage(`✓ Invitación enviada a ${email}. Debe revisar su correo para aceptar el acceso.`);
     setInvitingEmail(null);
     clearMessage();
   }
@@ -1318,21 +1298,8 @@ export default function AdminPage() {
 
     setClearingMessages(true);
 
-    const headers = await getAdminRequestHeaders();
-
-    if (!headers) {
-      setMessage('Debes iniciar sesión de nuevo para limpiar mensajes.');
-      setClearingMessages(false);
-      clearMessage();
-      return;
-    }
-
     const response = await fetch('/api/admin/messages', {
       method: 'DELETE',
-      headers: {
-        ...headers,
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({}),
     });
 
@@ -1360,21 +1327,8 @@ export default function AdminPage() {
 
     setClearingAuditLogs(true);
 
-    const headers = await getAdminRequestHeaders();
-
-    if (!headers) {
-      setMessage('Debes iniciar sesión de nuevo para limpiar auditoría.');
-      setClearingAuditLogs(false);
-      clearMessage();
-      return;
-    }
-
     const response = await fetch('/api/admin/audit', {
       method: 'DELETE',
-      headers: {
-        ...headers,
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({}),
     });
 
@@ -1401,21 +1355,8 @@ export default function AdminPage() {
 
     setDeletingMessageId(messageItem.id);
 
-    const headers = await getAdminRequestHeaders();
-
-    if (!headers) {
-      setMessage('Debes iniciar sesión de nuevo para borrar mensajes.');
-      setDeletingMessageId(null);
-      clearMessage();
-      return;
-    }
-
     const response = await fetch('/api/admin/messages', {
       method: 'DELETE',
-      headers: {
-        ...headers,
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({ id: messageItem.id }),
     });
 
@@ -1441,21 +1382,8 @@ export default function AdminPage() {
 
     setDeletingAuditId(logItem.id);
 
-    const headers = await getAdminRequestHeaders();
-
-    if (!headers) {
-      setMessage('Debes iniciar sesión de nuevo para borrar auditoría.');
-      setDeletingAuditId(null);
-      clearMessage();
-      return;
-    }
-
     const response = await fetch('/api/admin/audit', {
       method: 'DELETE',
-      headers: {
-        ...headers,
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({ id: logItem.id }),
     });
 
@@ -1591,7 +1519,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={async () => {
-                  await supabase.auth.signOut();
+                  await signOut();
                   router.replace('/login');
                 }}
                 className="rounded-full bg-[#FE9A01] px-4 py-2 font-bold text-[#0A1116] transition hover:brightness-95"

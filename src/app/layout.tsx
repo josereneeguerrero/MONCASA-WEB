@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
+import { ClerkProvider, Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import ThemeScript from "@/components/theme-script";
 import ThemeToggle from "@/components/theme-toggle";
 import FloatingCartVisibility from "@/components/floating-cart-visibility";
@@ -61,12 +62,33 @@ export default function RootLayout({
         <ThemeScript />
       </head>
       <body className="min-h-full flex flex-col bg-[var(--color-moncasa-page-bg)] text-[var(--color-moncasa-text)]">
-        <CartProvider>
-          {children}
-          <FloatingCartVisibility />
-          <WhatsAppFloat />
-        </CartProvider>
-        <ThemeToggle />
+        <ClerkProvider>
+          <header className="sticky top-0 z-50 border-b border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)]/90 backdrop-blur">
+            <div className="mx-auto flex w-full max-w-7xl items-center justify-end gap-3 px-4 py-3 sm:px-6 lg:px-8">
+              <Show when="signed-out">
+                <SignInButton>
+                  <button className="rounded-full border border-[var(--color-moncasa-border)] px-4 py-2 text-sm font-semibold transition hover:bg-[var(--color-moncasa-surface-soft)]">
+                    Iniciar sesión
+                  </button>
+                </SignInButton>
+                <SignUpButton>
+                  <button className="rounded-full bg-[#FE9A01] px-4 py-2 text-sm font-bold text-[#0A1116] transition hover:brightness-95">
+                    Crear cuenta
+                  </button>
+                </SignUpButton>
+              </Show>
+              <Show when="signed-in">
+                <UserButton />
+              </Show>
+            </div>
+          </header>
+          <CartProvider>
+            {children}
+            <FloatingCartVisibility />
+            <WhatsAppFloat />
+          </CartProvider>
+          <ThemeToggle />
+        </ClerkProvider>
         <Suspense fallback={null}>
           <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
         </Suspense>

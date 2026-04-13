@@ -30,6 +30,34 @@ Este crear:
 
 ---
 
+## 🔑 Paso 3: Configura las APIs
+
+### Supabase
+1. Ve a `Project Settings > API`.
+2. Copia `Project URL` en `NEXT_PUBLIC_SUPABASE_URL`.
+3. Copia `anon public` en `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+4. Copia `service_role` en `SUPABASE_SERVICE_ROLE_KEY` solo para servidor.
+
+### Clerk
+1. Ve a tu aplicación en Clerk.
+2. Copia la clave pública en `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`.
+3. Copia la clave secreta en `CLERK_SECRET_KEY`.
+4. En Clerk, revisa los dominios permitidos para tu entorno local y producción.
+
+### Resend
+1. Crea una API key en Resend.
+2. Guárdala en `RESEND_API_KEY`.
+3. Verifica un remitente o dominio en Resend.
+4. Usa ese remitente en `RESEND_FROM_EMAIL`, por ejemplo: `Ferretería Moncasa <no-reply@tu-dominio.com>`.
+5. Si estás probando en local, usa un remitente que Resend acepte en modo desarrollo.
+
+### Archivo recomendado
+1. Copia `.env.example` a `.env.local`.
+2. Completa todas las claves.
+3. Reinicia `npm run dev` después de cambiar variables.
+
+---
+
 ## 💻 Paso 3: Usa la configuración en tu código
 
 ### En componentes dinamicos
