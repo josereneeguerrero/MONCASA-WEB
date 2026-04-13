@@ -27,18 +27,18 @@ export default function SiteHeader({ active = 'inicio' }: SiteHeaderProps) {
           </p>
         </Link>
 
-        <div className="justify-self-end md:hidden">
+        <div className="justify-self-end lg:hidden">
           <MobileNavMenu />
         </div>
 
-        <nav aria-label="Principal" className="hidden items-center justify-center gap-1 overflow-x-auto whitespace-nowrap text-xs font-semibold md:flex lg:gap-2 lg:text-sm">
+        <nav aria-label="Principal" className="hidden items-center justify-center gap-1 overflow-x-auto whitespace-nowrap text-xs font-semibold lg:flex lg:gap-2 lg:text-sm">
           <Link href="/" className={getNavClassName('inicio')}>INICIO</Link>
           <Link href="/productos" className={getNavClassName('productos')}>PRODUCTOS</Link>
           <Link href="/nosotros" className={getNavClassName('nosotros')}>NOSOTROS</Link>
           <Link href="/contacto" className={getNavClassName('contacto')}>CONTACTO</Link>
         </nav>
 
-        <div className="hidden justify-self-end md:flex">
+        <div className="hidden justify-self-end lg:flex">
           <AuthControls />
         </div>
       </div>
