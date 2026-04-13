@@ -145,6 +145,8 @@ export default function AdminPage() {
   const [auditDateFilter, setAuditDateFilter] = useState<DateRangeFilter>({ from: '', to: '' });
   const [clearingMessages, setClearingMessages] = useState(false);
   const [clearingAuditLogs, setClearingAuditLogs] = useState(false);
+  const [deletingMessageId, setDeletingMessageId] = useState<string | number | null>(null);
+  const [deletingAuditId, setDeletingAuditId] = useState<string | number | null>(null);
   const [newAdminEmail, setNewAdminEmail] = useState('');
   const [newAdminRole, setNewAdminRole] = useState<AdminRoleValue>('admin');
   const [roleSearchTerm, setRoleSearchTerm] = useState('');
@@ -610,6 +612,19 @@ export default function AdminPage() {
   const clearAuditFilters = useCallback(() => {
     setAuditSearchTerm('');
     setAuditDateFilter({ from: '', to: '' });
+  }, []);
+
+  const getAdminRequestHeaders = useCallback(async () => {
+    const { data } = await supabase.auth.getSession();
+    const accessToken = data.session?.access_token;
+
+    if (!accessToken) {
+      return null;
+    }
+
+    return {
+      Authorization: `Bearer ${accessToken}`,
+    };
   }, []);
 
   const loadAdminRoles = useCallback(async () => {
@@ -1252,10 +1267,28 @@ export default function AdminPage() {
 
     setClearingMessages(true);
 
-    const { error } = await supabase.from('contactos').delete().neq('id', -1);
+    const headers = await getAdminRequestHeaders();
 
-    if (error) {
-      setMessage(`No se pudieron borrar los mensajes: ${error.message}`);
+    if (!headers) {
+      setMessage('Debes iniciar sesión de nuevo para limpiar mensajes.');
+      setClearingMessages(false);
+      clearMessage();
+      return;
+    }
+
+    const response = await fetch('/api/admin/messages', {
+      method: 'DELETE',
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    });
+
+    const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+
+    if (!response.ok) {
+      setMessage(payload?.error ?? 'No se pudieron borrar los mensajes.');
       setClearingMessages(false);
       clearMessage();
       return;
@@ -1276,10 +1309,28 @@ export default function AdminPage() {
 
     setClearingAuditLogs(true);
 
-    const { error } = await supabase.from(auditLogsTable).delete().neq('id', -1);
+    const headers = await getAdminRequestHeaders();
 
-    if (error) {
-      setMessage(`No se pudo borrar la auditoría: ${error.message}`);
+    if (!headers) {
+      setMessage('Debes iniciar sesión de nuevo para limpiar auditoría.');
+      setClearingAuditLogs(false);
+      clearMessage();
+      return;
+    }
+
+    const response = await fetch('/api/admin/audit', {
+      method: 'DELETE',
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    });
+
+    const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+
+    if (!response.ok) {
+      setMessage(payload?.error ?? 'No se pudo borrar la auditoría.');
       setClearingAuditLogs(false);
       clearMessage();
       return;
@@ -1289,6 +1340,86 @@ export default function AdminPage() {
     clearAuditFilters();
     setMessage('✓ Auditoría limpiada correctamente.');
     setClearingAuditLogs(false);
+    clearMessage();
+  }
+
+  async function handleDeleteMessage(messageItem: Mensaje) {
+    if (!window.confirm(`¿Eliminar el mensaje de ${messageItem.nombre}?`)) {
+      return;
+    }
+
+    setDeletingMessageId(messageItem.id);
+
+    const headers = await getAdminRequestHeaders();
+
+    if (!headers) {
+      setMessage('Debes iniciar sesión de nuevo para borrar mensajes.');
+      setDeletingMessageId(null);
+      clearMessage();
+      return;
+    }
+
+    const response = await fetch('/api/admin/messages', {
+      method: 'DELETE',
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id: messageItem.id }),
+    });
+
+    const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+
+    if (!response.ok) {
+      setMessage(payload?.error ?? 'No se pudo borrar el mensaje.');
+      setDeletingMessageId(null);
+      clearMessage();
+      return;
+    }
+
+    await loadMensajes();
+    setMessage('✓ Mensaje eliminado correctamente.');
+    setDeletingMessageId(null);
+    clearMessage();
+  }
+
+  async function handleDeleteAuditLog(logItem: AuditLog) {
+    if (!window.confirm('¿Eliminar este evento de auditoría?')) {
+      return;
+    }
+
+    setDeletingAuditId(logItem.id);
+
+    const headers = await getAdminRequestHeaders();
+
+    if (!headers) {
+      setMessage('Debes iniciar sesión de nuevo para borrar auditoría.');
+      setDeletingAuditId(null);
+      clearMessage();
+      return;
+    }
+
+    const response = await fetch('/api/admin/audit', {
+      method: 'DELETE',
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id: logItem.id }),
+    });
+
+    const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+
+    if (!response.ok) {
+      setMessage(payload?.error ?? 'No se pudo borrar la auditoría.');
+      setDeletingAuditId(null);
+      clearMessage();
+      return;
+    }
+
+    await loadAuditLogs();
+    setMessage('✓ Evento de auditoría eliminado correctamente.');
+    setDeletingAuditId(null);
     clearMessage();
   }
 
@@ -2181,54 +2312,69 @@ export default function AdminPage() {
                     </div>
                     <div className="grid gap-4">
                       {messagesByDate.map((msg) => {
-                  const fecha = new Date(msg.created_at).toLocaleDateString('es-HN', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  });
+                        const fecha = new Date(msg.created_at).toLocaleDateString('es-HN', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        });
 
-                  return (
-                    <article
-                      key={msg.id}
-                      className="rounded-[1.5rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-6 transition hover:border-[#FE9A01]/30"
-                    >
-                      <div className="mb-4 flex flex-col justify-between gap-2 sm:flex-row sm:items-start">
-                        <div>
-                          <h3 className="text-lg font-bold text-[var(--color-moncasa-text)]">{msg.nombre}</h3>
-                          <p className="text-xs text-[var(--color-moncasa-muted)]">{fecha}</p>
-                        </div>
-                        {msg.asunto && (
-                          <span className="inline-flex rounded-full bg-[#FE9A01]/20 px-3 py-1 text-xs font-semibold text-[#FE9A01]">
-                            {msg.asunto}
-                          </span>
-                        )}
-                      </div>
+                        return (
+                          <article
+                            key={msg.id}
+                            className="group rounded-[1.5rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-6 shadow-[0_8px_24px_var(--color-moncasa-shadow)] transition-all duration-200 hover:-translate-y-1 hover:border-[#FE9A01]/30 hover:shadow-[0_18px_42px_var(--color-moncasa-shadow)]"
+                          >
+                            <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                              <div>
+                                <h3 className="text-lg font-bold text-[var(--color-moncasa-text)]">{msg.nombre}</h3>
+                                <p className="text-xs text-[var(--color-moncasa-muted)]">{fecha}</p>
+                              </div>
+                              <div className="flex flex-wrap items-center gap-2">
+                                {msg.asunto && (
+                                  <span className="inline-flex rounded-full bg-[#FE9A01]/20 px-3 py-1 text-xs font-semibold text-[#FE9A01]">
+                                    {msg.asunto}
+                                  </span>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => void handleDeleteMessage(msg)}
+                                  disabled={deletingMessageId === msg.id}
+                                  className="rounded-full bg-red-600/20 px-3 py-1 text-xs font-semibold text-red-400 hover:bg-red-600/30 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                  {deletingMessageId === msg.id ? 'Borrando...' : 'Eliminar'}
+                                </button>
+                              </div>
+                            </div>
 
-                      <div className="space-y-2 text-sm">
-                        <p>
-                          <span className="font-semibold text-[var(--color-moncasa-muted)]">Email:</span>{' '}
-                          <a href={`mailto:${msg.email}`} className="text-[#FE9A01] hover:underline">
-                            {msg.email}
-                          </a>
-                        </p>
-                        {msg.telefono && (
-                          <p>
-                            <span className="font-semibold text-[var(--color-moncasa-muted)]">Teléfono:</span>{' '}
-                            <a href={`tel:${msg.telefono}`} className="text-[#FE9A01] hover:underline">
-                              {msg.telefono}
-                            </a>
-                          </p>
-                        )}
-                      </div>
+                            <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+                              <div className="space-y-2 text-sm">
+                                <p>
+                                  <span className="font-semibold text-[var(--color-moncasa-muted)]">Email:</span>{' '}
+                                  <a href={`mailto:${msg.email}`} className="text-[#FE9A01] hover:underline">
+                                    {msg.email}
+                                  </a>
+                                </p>
+                                {msg.telefono && (
+                                  <p>
+                                    <span className="font-semibold text-[var(--color-moncasa-muted)]">Teléfono:</span>{' '}
+                                    <a href={`tel:${msg.telefono}`} className="text-[#FE9A01] hover:underline">
+                                      {msg.telefono}
+                                    </a>
+                                  </p>
+                                )}
+                              </div>
 
-                      <div className="mt-4 rounded-lg border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] p-4">
-                        <p className="text-sm leading-6 text-[var(--color-moncasa-text)]">{msg.mensaje}</p>
-                      </div>
-                    </article>
-                  );
-                })}
+                              <div className="rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] p-4">
+                                <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                                  Mensaje
+                                </p>
+                                <p className="mt-2 text-sm leading-6 text-[var(--color-moncasa-text)]">{msg.mensaje}</p>
+                              </div>
+                            </div>
+                          </article>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
@@ -2308,28 +2454,42 @@ export default function AdminPage() {
                     </div>
                     <div className="space-y-3">
                       {logsByDate.map((log) => {
-                  const fecha = new Date(log.created_at).toLocaleString('es-HN');
-                  return (
-                    <article
-                      key={log.id}
-                      className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4"
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="rounded-full bg-[#FE9A01]/20 px-2 py-1 text-[10px] font-bold text-[#FE9A01]">
-                            {log.accion}
-                          </span>
-                          <span className="rounded-full border border-[var(--color-moncasa-border)] px-2 py-1 text-[10px] font-bold text-[var(--color-moncasa-muted)]">
-                            {log.entidad}
-                          </span>
-                        </div>
-                        <span className="text-xs text-[var(--color-moncasa-muted)]">{fecha}</span>
-                      </div>
-                      <p className="mt-2 text-sm text-[var(--color-moncasa-text)]">{log.detalle}</p>
-                      <p className="mt-1 text-xs text-[var(--color-moncasa-muted)]">Usuario: {log.usuario_email}</p>
-                    </article>
-                  );
-                })}
+                        const fecha = new Date(log.created_at).toLocaleString('es-HN');
+
+                        return (
+                          <article
+                            key={log.id}
+                            className="group rounded-[1.25rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4 shadow-[0_8px_24px_var(--color-moncasa-shadow)] transition-all duration-200 hover:-translate-y-1 hover:border-[#FE9A01]/30 hover:shadow-[0_18px_42px_var(--color-moncasa-shadow)]"
+                          >
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="rounded-full bg-[#FE9A01]/20 px-2 py-1 text-[10px] font-bold text-[#FE9A01]">
+                                  {log.accion}
+                                </span>
+                                <span className="rounded-full border border-[var(--color-moncasa-border)] px-2 py-1 text-[10px] font-bold text-[var(--color-moncasa-muted)]">
+                                  {log.entidad}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-[var(--color-moncasa-muted)]">{fecha}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => void handleDeleteAuditLog(log)}
+                                  disabled={deletingAuditId === log.id}
+                                  className="rounded-full bg-red-600/20 px-3 py-1 text-xs font-semibold text-red-400 hover:bg-red-600/30 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                  {deletingAuditId === log.id ? 'Borrando...' : 'Eliminar'}
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="mt-3 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-start">
+                              <p className="text-sm leading-6 text-[var(--color-moncasa-text)]">{log.detalle}</p>
+                              <p className="text-xs text-[var(--color-moncasa-muted)] lg:text-right">Usuario: {log.usuario_email}</p>
+                            </div>
+                          </article>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
