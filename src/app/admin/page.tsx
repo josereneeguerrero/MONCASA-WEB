@@ -1137,18 +1137,27 @@ export default function AdminPage() {
               </div>
 
               <form onSubmit={handleUpdate} className="space-y-3">
+                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                  Categoría
+                </label>
                 <input
                   value={editForm.category}
                   onChange={(e) => setEditForm((c) => ({ ...c, category: e.target.value }))}
                   placeholder="Categoría"
                   className="w-full rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none placeholder:text-[var(--color-moncasa-muted)] focus:border-[#FE9A01]/50"
                 />
+                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                  Nombre del producto
+                </label>
                 <input
                   value={editForm.title}
                   onChange={(e) => setEditForm((c) => ({ ...c, title: e.target.value }))}
                   placeholder="Nombre"
                   className="w-full rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none placeholder:text-[var(--color-moncasa-muted)] focus:border-[#FE9A01]/50"
                 />
+                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                  Descripción
+                </label>
                 <textarea
                   value={editForm.description}
                   onChange={(e) => setEditForm((c) => ({ ...c, description: e.target.value }))}
@@ -1156,12 +1165,18 @@ export default function AdminPage() {
                   rows={3}
                   className="w-full resize-none rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none placeholder:text-[var(--color-moncasa-muted)] focus:border-[#FE9A01]/50"
                 />
+                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                  Precio unitario (L)
+                </label>
                 <input
                   value={editForm.price}
                   onChange={(e) => setEditForm((c) => ({ ...c, price: e.target.value }))}
                   placeholder="Precio (L)"
                   className="w-full rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none placeholder:text-[var(--color-moncasa-muted)] focus:border-[#FE9A01]/50"
                 />
+                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                  Inventario (unidades)
+                </label>
                 <input
                   value={editForm.stock}
                   onChange={(e) => setEditForm((c) => ({ ...c, stock: e.target.value }))}
@@ -1171,6 +1186,9 @@ export default function AdminPage() {
                   step="1"
                   className="w-full rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none placeholder:text-[var(--color-moncasa-muted)] focus:border-[#FE9A01]/50"
                 />
+                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                  Orden manual
+                </label>
                 <input
                   value={editForm.sort_order}
                   onChange={(e) => setEditForm((c) => ({ ...c, sort_order: e.target.value }))}
@@ -1180,6 +1198,7 @@ export default function AdminPage() {
                   step="1"
                   className="w-full rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none placeholder:text-[var(--color-moncasa-muted)] focus:border-[#FE9A01]/50"
                 />
+                <p className="-mt-1 text-xs text-[var(--color-moncasa-muted)]">Menor número = más arriba en el catálogo.</p>
                 <div className="grid gap-2 sm:grid-cols-2">
                   <label className="flex items-center gap-2 rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)]">
                     <input
@@ -1187,7 +1206,7 @@ export default function AdminPage() {
                       checked={editForm.is_active}
                       onChange={(e) => setEditForm((c) => ({ ...c, is_active: e.target.checked }))}
                     />
-                    Activo
+                    Activo (visible en catálogo)
                   </label>
                   <label className="flex items-center gap-2 rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)]">
                     <input
@@ -1195,9 +1214,12 @@ export default function AdminPage() {
                       checked={editForm.is_featured}
                       onChange={(e) => setEditForm((c) => ({ ...c, is_featured: e.target.checked }))}
                     />
-                    Destacado
+                    Destacado (aparece primero)
                   </label>
                 </div>
+                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                  Imagen del producto
+                </label>
                 <input
                   value={editForm.image_url}
                   onChange={(e) => setEditForm((c) => ({ ...c, image_url: e.target.value }))}
@@ -1312,18 +1334,27 @@ export default function AdminPage() {
               </p>
 
               <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                  Categoría
+                </label>
                 <input
                   value={form.category}
                   onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}
                   placeholder="Categoría *"
                   className="w-full rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-4 py-3 text-[var(--color-moncasa-text)] outline-none placeholder:text-[var(--color-moncasa-muted)] focus:border-[#FE9A01]/50"
                 />
+                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                  Nombre del producto
+                </label>
                 <input
                   value={form.title}
                   onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
                   placeholder="Nombre del producto *"
                   className="w-full rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-4 py-3 text-[var(--color-moncasa-text)] outline-none placeholder:text-[var(--color-moncasa-muted)] focus:border-[#FE9A01]/50"
                 />
+                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                  Descripción
+                </label>
                 <textarea
                   value={form.description}
                   onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
@@ -1331,12 +1362,18 @@ export default function AdminPage() {
                   rows={4}
                   className="w-full resize-none rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-4 py-3 text-[var(--color-moncasa-text)] outline-none placeholder:text-[var(--color-moncasa-muted)] focus:border-[#FE9A01]/50"
                 />
+                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                  Precio unitario (L)
+                </label>
                 <input
                   value={form.price}
                   onChange={(event) => setForm((current) => ({ ...current, price: event.target.value }))}
                   placeholder="Precio (L) *"
                   className="w-full rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-4 py-3 text-[var(--color-moncasa-text)] outline-none placeholder:text-[var(--color-moncasa-muted)] focus:border-[#FE9A01]/50"
                 />
+                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                  Inventario (unidades)
+                </label>
                 <input
                   value={form.stock}
                   onChange={(event) => setForm((current) => ({ ...current, stock: event.target.value }))}
@@ -1346,6 +1383,9 @@ export default function AdminPage() {
                   step="1"
                   className="w-full rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-4 py-3 text-[var(--color-moncasa-text)] outline-none placeholder:text-[var(--color-moncasa-muted)] focus:border-[#FE9A01]/50"
                 />
+                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                  Orden manual
+                </label>
                 <input
                   value={form.sort_order}
                   onChange={(event) => setForm((current) => ({ ...current, sort_order: event.target.value }))}
@@ -1355,6 +1395,7 @@ export default function AdminPage() {
                   step="1"
                   className="w-full rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-4 py-3 text-[var(--color-moncasa-text)] outline-none placeholder:text-[var(--color-moncasa-muted)] focus:border-[#FE9A01]/50"
                 />
+                <p className="-mt-1 text-xs text-[var(--color-moncasa-muted)]">Menor número = más arriba en el catálogo.</p>
                 <div className="grid gap-2 sm:grid-cols-2">
                   <label className="flex items-center gap-2 rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-4 py-3 text-sm text-[var(--color-moncasa-text)]">
                     <input
@@ -1362,7 +1403,7 @@ export default function AdminPage() {
                       checked={form.is_active}
                       onChange={(event) => setForm((current) => ({ ...current, is_active: event.target.checked }))}
                     />
-                    Producto activo
+                    Producto activo (visible)
                   </label>
                   <label className="flex items-center gap-2 rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-4 py-3 text-sm text-[var(--color-moncasa-text)]">
                     <input
@@ -1370,9 +1411,12 @@ export default function AdminPage() {
                       checked={form.is_featured}
                       onChange={(event) => setForm((current) => ({ ...current, is_featured: event.target.checked }))}
                     />
-                    Producto destacado
+                    Producto destacado (primero)
                   </label>
                 </div>
+                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                  Imagen del producto
+                </label>
                 <input
                   value={form.image_url}
                   onChange={(event) => setForm((current) => ({ ...current, image_url: event.target.value }))}
