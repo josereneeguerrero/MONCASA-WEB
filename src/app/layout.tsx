@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
+import ThemeScript from "@/components/theme-script";
 import ThemeToggle from "@/components/theme-toggle";
 import FloatingCartVisibility from "@/components/floating-cart-visibility";
 import WhatsAppFloat from "@/components/whatsapp-float";
@@ -56,6 +57,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
       <body className="min-h-full flex flex-col bg-[var(--color-moncasa-page-bg)] text-[var(--color-moncasa-text)]">
         <CartProvider>
           {children}

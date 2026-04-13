@@ -4,6 +4,9 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import BrandLogo from '@/components/brand-logo';
+import { useConfig } from '@/lib/useConfig';
+
+const { get } = useConfig();
 
 export default function LoginPage() {
   const router = useRouter();
@@ -51,7 +54,7 @@ export default function LoginPage() {
               Ferretería Moncasa
             </p>
           </div>
-          <h1 className="text-3xl font-semibold">Acceso administrativo</h1>
+          <h1>{get('hero_titulo')}</h1>
           <p className="mt-3 text-sm text-[var(--color-moncasa-muted)]">{message}</p>
 
           <form className="mt-6 space-y-4" onSubmit={onSubmit}>

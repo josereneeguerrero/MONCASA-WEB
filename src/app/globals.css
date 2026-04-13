@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light dark;
   --color-moncasa-orange: #fe9a01;
   --color-moncasa-gold: #ffb52d;
   --color-moncasa-dark: #0a1116;

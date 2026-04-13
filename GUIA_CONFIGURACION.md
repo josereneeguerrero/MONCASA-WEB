@@ -1,0 +1,207 @@
+# 🎯 Guía: Sistema de Configuración Global
+
+Has implementado un sistema completo para gestionar contenidos dinámicamente sin tocar código. Aquí está todo lo que necesitas saber.
+
+---
+
+## 📋 Paso 1: Crear la tabla en Supabase
+
+1. Ve a tu proyecto Supabase: https://app.supabase.com
+2. Abre el **SQL Editor** y ejecuta el SQL en `SETUP_CONFIGURACION.sql`
+
+Este crear:
+- Tabla `configuracion_sitio` con políticas de permisos
+- Datos iniciales de ejemplo
+- Índices para búsqueda rápida
+
+---
+
+## 🎛️ Paso 2: Usa el panel admin
+
+1. Accede a `/admin` en tu aplicación
+2. Haz clic en la tab **"Configuración"**
+3. Verás todos los items editables organizados por tipo:
+   - **texto**: Titulos, descripciones
+   - **url**: Enlaces a redes sociales
+   - **email**: Correos de contacto
+   - **numero**: Valores numéricos
+
+4. Edita los valores y haz clic en **"Guardar"**
+
+---
+
+## 💻 Paso 3: Usa la configuración en tu código
+
+### En componentes dinamicos
+```tsx
+import { useConfig } from '@/lib/useConfig';
+
+export default function HeroSection() {
+  const { config, get, loading } = useConfig();
+  
+  if (loading) return <p>Cargando...</p>;
+  
+  return (
+    <>
+      <h1>{get('hero_titulo')}</h1>
+      <p>{get('hero_subtitulo')}</p>
+      <a href={get('hero_cta_link')}>
+        {get('hero_cta_text')}
+      </a>
+    </>
+  );
+}
+```
+
+### Keys disponibles
+```
+// Hero
+hero_titulo
+hero_subtitulo
+hero_cta_text
+hero_cta_link
+
+// Contacto
+telefono
+whatsapp
+email_contacto
+ubicacion
+
+// Horarios
+horario_lunes_viernes
+horario_sabado
+horario_domingo
+
+// Redes sociales
+facebook
+youtube
+instagram
+
+// Sitio
+nombre_empresa
+slogan
+descripcion_corta
+
+// Banner
+banner_activo
+banner_texto
+banner_tipo
+```
+
+---
+
+## 🚀 Ejemplo: Actualizar Hero Section dinámicamente
+
+**Antes (hardcodeado):**
+```tsx
+<h1 className="text-5xl font-black">
+  Tu aliado confiable en construcción y hogar
+</h1>
+```
+
+**Después (dinámico):**
+```tsx
+'use client';
+import { useConfig } from '@/lib/useConfig';
+
+export default function HeroSection() {
+  const { get } = useConfig();
+  
+  return (
+    <h1 className="text-5xl font-black">
+      {get('hero_titulo', 'Valor por defecto')}
+    </h1>
+  );
+}
+```
+
+---
+
+## 🛠️ Agregar más configuraciones
+
+¿Necesitas agregar una nueva configuración? Dos formas:
+
+### Opción 1: Via Supabase (recomendada)
+1. Abre la tabla `configuracion_sitio` en Supabase
+2. Inserta una nueva fila:
+   - `clave`: Nombre único (ej: `hero_imagen_url`)
+   - `valor`: Valor inicial
+   - `tipo`: texto, url, email, numero
+   - `descripcion`: Para recordar qué es
+
+3. Usa inmediatamente: `get('hero_imagen_url')`
+
+### Opción 2: Via Admin Panel
+El panel detecta automáticamente nuevas configuraciones que agregues en Supabase.
+
+---
+
+## ⚙️ Casos de uso
+
+### 1. Banner de anuncio
+```tsx
+const { get } = useConfig();
+const mostrarBanner = get('banner_activo') === 'true';
+
+{mostrarBanner && (
+  <div className={`bg-${get('banner_tipo')}`}>
+    {get('banner_texto')}
+  </div>
+)}
+```
+
+### 2. Links dinámicos
+```tsx
+<a href={`tel:${get('telefono')}`}>
+  {get('telefono')}
+</a>
+
+<a href={`https://wa.me/${get('whatsapp')}`}>
+  Enviar WhatsApp
+</a>
+```
+
+### 3. Horarios dinámicos
+```tsx
+<p>Lunes a viernes: {get('horario_lunes_viernes')}</p>
+<p>Sábado: {get('horario_sabado')}</p>
+<p>Domingo: {get('horario_domingo')}</p>
+```
+
+---
+
+## 🔄 Caching
+
+El hook `useConfig()` cachea los datos por **5 minutos** para mejor rendimiento.
+
+Si necesitas actualizar en tiempo real después de guardar desde el admin:
+```tsx
+const { refreshConfig } = useConfig();
+
+// Para refrescar después de guardar
+await updateConfigValue(...);
+refreshConfig();
+```
+
+---
+
+## 🔒 Permisos
+
+- **Lectura**: Todos (público)
+- **Escritura**: Solo usuarios autenticados en el panel admin
+- **RLS**: Habilitado en Supabase (políticas de seguridad)
+
+---
+
+## 📞 Soporte
+
+Si necesitas cambios adicionales:
+- Agregar más campos a la tabla
+- Agregar nuevas tabs al admin
+- Crear importadores CSV
+
+Contacta al desarrollador.
+
+---
+
+**¡Ya puedes editar tu sitio sin tocar código! 🎉**

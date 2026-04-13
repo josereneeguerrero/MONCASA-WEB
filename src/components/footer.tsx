@@ -110,7 +110,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className="mt-8 text-center">
           <p className="text-sm text-[var(--color-moncasa-inverse-muted)]">
-            © 2026 Ferretería Moncasa. Todos los derechos reservados. Powered by innovation.
+            © 2026 Ferretería Moncasa. Todos los derechos reservados. Desarrollada por Renee Guerrero.
           </p>
         </div>
       </div>

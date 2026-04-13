@@ -112,12 +112,9 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
       <div className="mx-auto min-h-[calc(100vh-2rem)] max-w-7xl overflow-hidden rounded-[2rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] shadow-[0_18px_60px_var(--color-moncasa-shadow)]">
         <header className="sticky top-0 z-50 border-b border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] px-5 py-4 sm:px-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <Link href="/" className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-2">
               <BrandLogo className="h-12 w-12 rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] object-cover p-1 shadow-[0_8px_24px_var(--color-moncasa-shadow)]" />
-              <div className="leading-tight">
-                <p className="text-[10px] font-bold tracking-[0.35em] text-[#FE9A01]">FERRETERIA MONCASA</p>
-                <p className="text-sm text-[var(--color-moncasa-muted)]">San Lorenzo, Honduras</p>
-              </div>
+              <p className="text-[10px] font-bold tracking-[0.35em] text-[#FE9A01]">FERRETERIA MONCASA</p>
             </Link>
 
             <nav aria-label="Principal" className="flex flex-wrap items-center gap-2 text-sm font-semibold">

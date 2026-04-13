@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import BrandLogo from '@/components/brand-logo';
+import ConfigPanel from '@/components/config-panel';
 import { productSchema } from '@/lib/validation';
 
 type Product = {
@@ -68,7 +69,7 @@ type FormState = {
   image_url: string;
 };
 
-type TabType = 'productos' | 'mensajes' | 'auditoria' | 'seguridad';
+type TabType = 'productos' | 'mensajes' | 'auditoria' | 'seguridad' | 'configuracion';
 type StatusFilter = 'all' | 'active' | 'inactive' | 'featured' | 'out_of_stock';
 type ProductSortMode = 'manual' | 'name' | 'price_desc' | 'price_asc' | 'stock_desc' | 'stock_asc';
 type AdminRoleValue = 'owner' | 'admin' | 'editor' | 'viewer';
@@ -1552,50 +1553,61 @@ export default function AdminPage() {
         </header>
 
         {/* TABS */}
-        <div className="flex border-b border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)]">
+        <div className="flex border-b border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] overflow-x-auto">
           <button
             type="button"
             onClick={() => setActiveTab('productos')}
-            className={`flex-1 px-6 py-4 text-center font-bold transition ${
+            className={`px-6 py-4 text-center font-bold transition whitespace-nowrap ${
               activeTab === 'productos'
                 ? 'border-b-2 border-[#FE9A01] text-[#FE9A01]'
                 : 'text-[var(--color-moncasa-muted)] hover:text-[var(--color-moncasa-text)]'
             }`}
           >
-            📦 Productos
+            Productos
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('mensajes')}
-            className={`flex-1 px-6 py-4 text-center font-bold transition ${
+            className={`px-6 py-4 text-center font-bold transition whitespace-nowrap ${
               activeTab === 'mensajes'
                 ? 'border-b-2 border-[#FE9A01] text-[#FE9A01]'
                 : 'text-[var(--color-moncasa-muted)] hover:text-[var(--color-moncasa-text)]'
             }`}
           >
-            💬 Mensajes ({mensajes.length})
+            Mensajes ({mensajes.length})
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('auditoria')}
-            className={`flex-1 px-6 py-4 text-center font-bold transition ${
+            className={`px-6 py-4 text-center font-bold transition whitespace-nowrap ${
               activeTab === 'auditoria'
                 ? 'border-b-2 border-[#FE9A01] text-[#FE9A01]'
                 : 'text-[var(--color-moncasa-muted)] hover:text-[var(--color-moncasa-text)]'
             }`}
           >
-            🧾 Auditoría ({auditLogs.length})
+            Auditoría ({auditLogs.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('configuracion')}
+            className={`px-6 py-4 text-center font-bold transition whitespace-nowrap ${
+              activeTab === 'configuracion'
+                ? 'border-b-2 border-[#FE9A01] text-[#FE9A01]'
+                : 'text-[var(--color-moncasa-muted)] hover:text-[var(--color-moncasa-text)]'
+            }`}
+          >
+            Configuración
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('seguridad')}
-            className={`flex-1 px-6 py-4 text-center font-bold transition ${
+            className={`px-6 py-4 text-center font-bold transition whitespace-nowrap ${
               activeTab === 'seguridad'
                 ? 'border-b-2 border-[#FE9A01] text-[#FE9A01]'
                 : 'text-[var(--color-moncasa-muted)] hover:text-[var(--color-moncasa-text)]'
             }`}
           >
-            🔐 Seguridad y respaldos
+            Seguridad y respaldos
           </button>
         </div>
 
@@ -2499,6 +2511,20 @@ export default function AdminPage() {
                 <p className="text-[var(--color-moncasa-muted)]">Sin registros de auditoría para este filtro.</p>
               </div>
             )}
+          </section>
+        )}
+
+        {/* CONTENIDO PRINCIPAL - TAB CONFIGURACIÓN */}
+        {activeTab === 'configuracion' && (
+          <section className="px-6 py-8 sm:px-8">
+            <div className="mb-6">
+              <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#FE9A01]">Configuración</p>
+              <h2 className="mt-2 text-3xl font-black text-[var(--color-moncasa-text)]">Gestiona tu sitio</h2>
+              <p className="mt-2 max-w-2xl text-[var(--color-moncasa-muted)]">
+                Edita títulos, descripciones, información de contacto y otros datos del sitio sin necesidad de código.
+              </p>
+            </div>
+            <ConfigPanel currentUserEmail={currentUserEmail} />
           </section>
         )}
 
