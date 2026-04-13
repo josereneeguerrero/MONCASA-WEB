@@ -30,7 +30,7 @@ Crea `.env.local` con:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-SUPABASE_SERVICE_ROLE_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=... # opcional, recomendado para operaciones administrativas servidor
 NEXT_PUBLIC_SUPABASE_PRODUCTS_TABLE=productos
 NEXT_PUBLIC_SUPABASE_PRODUCTS_BUCKET=productos
 NEXT_PUBLIC_SUPABASE_CONTACTS_TABLE=contactos
@@ -94,6 +94,7 @@ ALTER TABLE admin_backups ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS admin_audit_select ON admin_audit_logs;
 DROP POLICY IF EXISTS admin_audit_insert ON admin_audit_logs;
+DROP POLICY IF EXISTS admin_audit_delete_admins ON admin_audit_logs;
 DROP POLICY IF EXISTS admin_roles_all ON admin_roles;
 DROP POLICY IF EXISTS admin_backups_all ON admin_backups;
 
@@ -104,6 +105,18 @@ USING (auth.role() = 'authenticated');
 CREATE POLICY admin_audit_insert
 ON admin_audit_logs FOR INSERT
 WITH CHECK (auth.role() = 'authenticated');
+
+CREATE POLICY admin_audit_delete_admins
+ON admin_audit_logs FOR DELETE
+USING (
+	EXISTS (
+		SELECT 1
+		FROM admin_roles
+		WHERE admin_roles.email = auth.jwt() ->> 'email'
+			AND admin_roles.activo = true
+			AND admin_roles.role IN ('owner', 'admin')
+	)
+);
 
 CREATE POLICY admin_roles_all
 ON admin_roles FOR ALL

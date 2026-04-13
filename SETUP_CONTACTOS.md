@@ -32,6 +32,19 @@ WITH CHECK (true);
 CREATE POLICY "contactos_allow_select_authenticated"
 ON contactos FOR SELECT
 USING (auth.role() = 'authenticated');
+
+-- Política: Permitir delete solo a owners/admins activos (para panel admin)
+CREATE POLICY "contactos_allow_delete_admins"
+ON contactos FOR DELETE
+USING (
+  EXISTS (
+    SELECT 1
+    FROM admin_roles
+    WHERE admin_roles.email = auth.jwt() ->> 'email'
+      AND admin_roles.activo = true
+      AND admin_roles.role IN ('owner', 'admin')
+  )
+);
 ```
 
 ## 2. Agregar variable de entorno (opcional)
@@ -59,7 +72,8 @@ En Supabase Dashboard:
 - La tabla está protegida por RLS:
   - **Inserts**: Públicos (para el formulario)
   - **Selects**: Solo usuarios autenticados (para admin)
-  - **Updates/Deletes**: No permitidos (proteger datos)
+  - **Deletes**: Solo owner/admin activos desde panel
+  - **Updates**: No permitidos
 
 ## Opcional: Agregar notificaciones por email
 

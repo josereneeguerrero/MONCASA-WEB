@@ -96,3 +96,19 @@ textarea:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--color-moncasa-orange) 70%, white 30%);
   outline-offset: 2px;
 }
+
+@keyframes moncasa-toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.moncasa-toast-enter {
+  animation: moncasa-toast-enter 220ms ease-out;
+}

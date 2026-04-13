@@ -2027,11 +2027,6 @@ export default function AdminPage() {
                 </button>
               </form>
 
-              {message ? (
-                <p className={`mt-4 text-sm font-semibold ${message.startsWith('✓') ? 'text-green-400' : 'text-red-400'}`}>
-                  {message}
-                </p>
-              ) : null}
             </div>
 
             {/* CATÁLOGO */}
@@ -2759,6 +2754,31 @@ export default function AdminPage() {
             </div>
           </section>
         )}
+
+        {message ? (
+          <div className="pointer-events-auto fixed bottom-6 right-6 z-[70] w-[min(92vw,28rem)] moncasa-toast-enter">
+            <div
+              className={`relative rounded-2xl border px-4 py-3 shadow-[0_20px_40px_var(--color-moncasa-shadow)] backdrop-blur-sm ${
+                message.startsWith('✓')
+                  ? 'border-emerald-400/50 bg-emerald-500/15 text-emerald-100'
+                  : message.startsWith('⚠')
+                    ? 'border-amber-400/50 bg-amber-500/15 text-amber-100'
+                    : 'border-rose-400/50 bg-rose-500/15 text-rose-100'
+              }`}
+            >
+              <button
+                onClick={() => setMessage('')}
+                className="absolute top-2 right-2 p-1 rounded-lg hover:bg-white/10 transition opacity-70 hover:opacity-100"
+                aria-label="Cerrar notificación"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+              <p className="text-sm font-semibold leading-6 pr-6">{message}</p>
+            </div>
+          </div>
+        ) : null}
       </div>
     </main>
   );
