@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import BrandLogo from '@/components/brand-logo';
+import Footer from '@/components/footer';
 
 export const dynamic = 'force-dynamic';
 
@@ -132,12 +133,12 @@ export default async function Home() {
         <main id="inicio" className="px-5 py-8 sm:px-8 sm:py-10 flex-1">
           <section className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
             <div className="space-y-6 moncasa-fade-in-up" style={{ animationDelay: '100ms' }}>
-              <p className="text-sm font-bold uppercase tracking-[0.35em] text-[#FE9A01] moncasa-fade-in" style={{ animationDelay: '200ms' }}>¡BIENVENIDO!</p>
+              <p className="text-sm font-bold uppercase tracking-[0.35em] text-[#FE9A01] moncasa-fade-in" style={{ animationDelay: '200ms' }}>Bienvenido</p>
               <h1 className="max-w-xl text-5xl sm:text-6xl font-black leading-[0.95] tracking-tight text-[var(--color-moncasa-text)] moncasa-fade-in-up" style={{ animationDelay: '300ms' }}>
-                Tu aliado confiable en San Lorenzo para cada proyecto de construcción y hogar.
+                Tu aliado confiable en construcción y hogar
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-[var(--color-moncasa-muted)] moncasa-fade-in" style={{ animationDelay: '400ms' }}>
-                Calidad que construye, servicio que cumple.
+                Productos de calidad y asesoría profesional en San Lorenzo, Honduras.
               </p>
 
               <div className="flex flex-wrap gap-4 pt-2 moncasa-fade-in" style={{ animationDelay: '500ms' }}>
@@ -145,10 +146,10 @@ export default async function Home() {
                   href="/productos"
                   className="rounded-full bg-[#FE9A01] px-6 py-3 text-sm font-bold text-[#0A1116] transition hover:brightness-95 hover:shadow-lg"
                 >
-                  🛒 Conoce nuestros productos
+                  Catálogo de productos
                 </Link>
                 <Link href="/contacto" className="rounded-full border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] px-6 py-3 text-sm font-bold text-[var(--color-moncasa-text)] transition hover:bg-[var(--color-moncasa-surface-soft)] hover:border-[#FE9A01]/50">
-                  💬 Habla con un asesor
+                  Contactate con nosotros
                 </Link>
               </div>
             </div>
@@ -157,25 +158,25 @@ export default async function Home() {
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(254,154,1,0.22),transparent_40%)]" />
               <div className="relative space-y-4">
                 <div className="flex items-center justify-between text-white/70">
-                  <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#FE9A01]">✨ Promociones Destacadas</p>
-                  <span className="rounded-full border border-[#FE9A01]/30 bg-[#FE9A01]/10 px-3 py-1 text-xs font-semibold text-[#FE9A01]">HOY</span>
+                  <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#FE9A01]">Promociones destacadas</p>
+                  <span className="rounded-full border border-[#FE9A01]/30 bg-[#FE9A01]/10 px-3 py-1 text-xs font-semibold text-[#FE9A01]">Disponible hoy</span>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="rounded-[1.5rem] border border-[#FE9A01]/30 bg-gradient-to-br from-[#FE9A01]/15 to-[#FE9A01]/5 p-4 text-white hover:border-[#FE9A01]/60 hover:bg-[#FE9A01]/10 transition">
-                    <p className="text-sm text-white/60 font-medium">📌 Promo destacada</p>
+                    <p className="text-sm text-white/60 font-medium">Categoría destacada</p>
                     <p className="mt-2 text-2xl font-black">Herramientas</p>
-                    <p className="mt-1 text-sm text-white/70">Descuentos en taladros y accesorios.</p>
+                    <p className="mt-1 text-sm text-white/70">Descuentos especiales en herramientas y accesorios de construcción.</p>
                   </div>
                   <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4 text-white hover:border-white/30 hover:bg-white/10 transition">
-                    <p className="text-sm text-white/60 font-medium">🏠 Promo hogar</p>
+                    <p className="text-sm text-white/60 font-medium">Lo más solicitado</p>
                     <p className="mt-2 text-2xl font-black">Pinturas</p>
-                    <p className="mt-1 text-sm text-white/70">Acabados, selladores y brochas.</p>
+                    <p className="mt-1 text-sm text-white/70">Pinturas, acabados, selladores y accesorios de aplicación.</p>
                   </div>
                 </div>
 
                 <div className="rounded-[1.5rem] border border-white/10 bg-gradient-to-r from-[#FE9A01] via-[#ffb52d] to-[#ffd37a] p-4 text-[#0A1116] hover:shadow-lg transition">
-                  <p className="text-sm font-bold uppercase tracking-[0.2em]">📢 Últimas ofertas</p>
+                  <p className="text-sm font-bold uppercase tracking-[0.2em]">Descubre todas nuestras ofertas</p>
                   <div className="mt-4 grid grid-cols-3 gap-3">
                     <div className="aspect-square rounded-2xl bg-white/60 hover:bg-white/80 transition" />
                     <div className="aspect-square rounded-2xl bg-white/30 hover:bg-white/50 transition" />
@@ -188,9 +189,9 @@ export default async function Home() {
 
           <section id="productos" className="mt-16">
             <div className="mb-8">
-              <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#FE9A01]">Nuestro inventario</p>
-              <h2 className="mt-2 text-4xl font-black text-[var(--color-moncasa-text)]">Productos destacados</h2>
-              <p className="mt-2 text-[var(--color-moncasa-muted)]">Conoce nuestras principales categorías</p>
+              <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#FE9A01]">Catálogo</p>
+              <h2 className="mt-2 text-4xl font-black text-[var(--color-moncasa-text)]">Productos principales</h2>
+              <p className="mt-2 text-[var(--color-moncasa-muted)]">Descubre nuestras principales categorías de productos disponibles</p>
             </div>
             <div className="grid gap-6 md:grid-cols-3">
               {products.map((product, idx) => (
@@ -204,18 +205,13 @@ export default async function Home() {
                       <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#FE9A01]">{product.category}</p>
                       <h3 className="mt-2 text-2xl font-black text-[var(--color-moncasa-text)]">{product.title}</h3>
                     </div>
-                    <span className="text-3xl ml-2">
-                      {product.category.includes('Herramienta') ? '🔧' : 
-                       product.category.includes('Construcción') ? '🏗️' : 
-                       product.category.includes('Hogar') ? '🏠' : '📦'}
-                    </span>
                   </div>
                   {'featured' in product && product.featured ? (
-                    <p className="mt-3 inline-flex rounded-full bg-[#FE9A01]/20 px-3 py-1 text-xs font-bold text-[#FE9A01]">⭐ Destacado</p>
+                    <p className="mt-3 inline-flex rounded-full bg-[#FE9A01]/20 px-3 py-1 text-xs font-bold text-[#FE9A01]">Destacado</p>
                   ) : null}
                   <p className="mt-4 text-[var(--color-moncasa-muted)] leading-6">{product.description}</p>
                   <Link href="/productos" className="mt-4 inline-block rounded-lg bg-[#FE9A01]/10 px-4 py-2 text-sm font-bold text-[#FE9A01] transition hover:bg-[#FE9A01]/20">
-                    Ver más →
+                    Más información
                   </Link>
                 </div>
               ))}
@@ -225,32 +221,28 @@ export default async function Home() {
             <section id="nosotros" className="mt-16 rounded-[2rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-8 sm:p-10 moncasa-fade-in-up">
               <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
                 <div>
-                  <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#FE9A01]">¿Por qué nosotros?</p>
-                  <h2 className="mt-2 text-4xl font-black text-[var(--color-moncasa-text)]">Servicio cercano, solución rápida.</h2>
+                  <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#FE9A01]">Sobre nosotros</p>
+                  <h2 className="mt-2 text-4xl font-black text-[var(--color-moncasa-text)]">Servicio confiable, soluciones rápidas</h2>
                   <p className="mt-4 text-lg leading-8 text-[var(--color-moncasa-muted)]">
-                    Ofrecemos asesoría integral para proyectos de construcción y hogar con enfoque en disponibilidad, confianza y atención local en San Lorenzo. Somos tu ferretería de confianza.
+                    Ofrecemos soluciones integrales para proyectos de construcción y mejoramiento del hogar con enfoque en disponibilidad, confianza y atención profesional. Somos tu ferretería de confianza en San Lorenzo.
                   </p>
 
                   <div className="mt-8 grid gap-4 sm:grid-cols-2">
                     <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4 hover:bg-[#FE9A01]/5 transition">
-                      <p className="text-2xl">🎯</p>
-                      <p className="mt-2 font-bold text-[var(--color-moncasa-text)]">Precisión</p>
-                      <p className="mt-1 text-sm text-[var(--color-moncasa-muted)]">Productos selectos y asesoría exacta</p>
+                      <p className="text-lg font-bold text-[var(--color-moncasa-text)]">Precisión</p>
+                      <p className="mt-1 text-sm text-[var(--color-moncasa-muted)]">Productos selectos y asesoría técnica exacta</p>
                     </div>
                     <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4 hover:bg-[#FE9A01]/5 transition">
-                      <p className="text-2xl">⚡</p>
-                      <p className="mt-2 font-bold text-[var(--color-moncasa-text)]">Rapidez</p>
-                      <p className="mt-1 text-sm text-[var(--color-moncasa-muted)]">Respuesta inmediata en San Lorenzo</p>
+                      <p className="text-lg font-bold text-[var(--color-moncasa-text)]">Rapidez</p>
+                      <p className="mt-1 text-sm text-[var(--color-moncasa-muted)]">Servicio rápido y atención inmediata</p>
                     </div>
                     <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4 hover:bg-[#FE9A01]/5 transition">
-                      <p className="text-2xl">🤝</p>
-                      <p className="mt-2 font-bold text-[var(--color-moncasa-text)]">Confianza</p>
-                      <p className="mt-1 text-sm text-[var(--color-moncasa-muted)]">Relación de largo plazo con clientes</p>
+                      <p className="text-lg font-bold text-[var(--color-moncasa-text)]">Confianza</p>
+                      <p className="mt-1 text-sm text-[var(--color-moncasa-muted)]">Relaciones duraderas con nuestros clientes</p>
                     </div>
                     <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4 hover:bg-[#FE9A01]/5 transition">
-                      <p className="text-2xl">📍</p>
-                      <p className="mt-2 font-bold text-[var(--color-moncasa-text)]">Local</p>
-                      <p className="mt-1 text-sm text-[var(--color-moncasa-muted)]">Presencia física en San Lorenzo</p>
+                      <p className="text-lg font-bold text-[var(--color-moncasa-text)]">Presencia Local</p>
+                      <p className="mt-1 text-sm text-[var(--color-moncasa-muted)]">Ubicación física en San Lorenzo</p>
                     </div>
                   </div>
                 </div>
@@ -258,8 +250,8 @@ export default async function Home() {
                 <div className="rounded-2xl border border-[var(--color-moncasa-border)] bg-gradient-to-br from-[#FE9A01]/15 to-[#FE9A01]/5 p-8 flex flex-col justify-center moncasa-float">
                   <div className="space-y-4">
                     <div className="text-center">
-                      <p className="text-5xl font-black text-[#FE9A01]">+15</p>
-                      <p className="mt-2 text-sm text-[var(--color-moncasa-muted)]">Años de trayectoria</p>
+                      <p className="text-5xl font-black text-[#FE9A01]">15+</p>
+                      <p className="mt-2 text-sm text-[var(--color-moncasa-muted)]">Años en el mercado</p>
                     </div>
                     <div className="h-px bg-gradient-to-r from-transparent via-[#FE9A01]/30 to-transparent" />
                     <div className="text-center">
@@ -269,7 +261,7 @@ export default async function Home() {
                     <div className="h-px bg-gradient-to-r from-transparent via-[#FE9A01]/30 to-transparent" />
                     <div className="text-center">
                       <p className="text-5xl font-black text-[#FE9A01]">24/7</p>
-                      <p className="mt-2 text-sm text-[var(--color-moncasa-muted)]">Disponibles para ti</p>
+                      <p className="mt-2 text-sm text-[var(--color-moncasa-muted)]">Disponibilidad</p>
                     </div>
                   </div>
                 </div>
@@ -277,54 +269,8 @@ export default async function Home() {
             </section>
         </main>
 
-          <footer id="contacto" className="mt-16 border-t border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-inverse-surface)] px-8 py-12 text-[var(--color-moncasa-inverse-text)]">
-            <div className="grid gap-10 lg:grid-cols-[1.5fr_1fr_1fr]">
-              {/* Información principal */}
-              <div>
-                <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#FE9A01]">📞 Contáctanos</p>
-                <p className="mt-4 text-lg font-bold">Teléfono</p>
-                <a href="tel:+50432184060" className="text-[#FE9A01] hover:underline font-semibold">
-                  +504 3218-4060
-                </a>
-                <p className="mt-4 text-lg font-bold">Ubicación</p>
-                <p className="text-[var(--color-moncasa-inverse-muted)]">San Lorenzo, Honduras</p>
-                <div className="mt-6 flex gap-3">
-                  <a href="https://www.facebook.com/MoncasaHN" target="_blank" rel="noreferrer" className="rounded-lg border border-white/10 px-3 py-2 transition hover:bg-white/5 hover:border-[#FE9A01]">
-                    f
-                  </a>
-                  <a href="https://www.youtube.com/@MoncasaHN" target="_blank" rel="noreferrer" className="rounded-lg border border-white/10 px-3 py-2 transition hover:bg-white/5 hover:border-[#FE9A01]">
-                    ▶
-                  </a>
-                  <a href="https://wa.me/50432184060" target="_blank" rel="noreferrer" className="rounded-lg border border-white/10 px-3 py-2 transition hover:bg-white/5 hover:border-[#FE9A01]">
-                    W
-                  </a>
-                </div>
-              </div>
-
-              {/* Enlaces rápidos */}
-              <div>
-                <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#FE9A01]">🔗 Enlaces</p>
-                <ul className="mt-4 space-y-3 text-[var(--color-moncasa-inverse-muted)]">
-                  <li><Link href="/" className="hover:text-[#FE9A01]">Inicio</Link></li>
-                  <li><Link href="/productos" className="hover:text-[#FE9A01]">Productos</Link></li>
-                  <li><Link href="/nosotros" className="hover:text-[#FE9A01]">Nosotros</Link></li>
-                  <li><Link href="/contacto" className="hover:text-[#FE9A01]">Contacto</Link></li>
-                </ul>
-              </div>
-
-              {/* CTA */}
-              <div className="rounded-xl border border-[#FE9A01]/30 bg-[#FE9A01]/10 p-6">
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#FE9A01]">📧 Newsletter</p>
-                <p className="mt-2 text-sm text-[var(--color-moncasa-inverse-muted)]">Entérate de nuestras últimas promociones</p>
-                <Link href="/contacto" className="mt-4 inline-block rounded-lg bg-[#FE9A01] px-4 py-2 text-sm font-bold text-[#0A1116] transition hover:brightness-95">
-                  Contáctanos
-                </Link>
-              </div>
-            </div>
-
-            <div className="mt-8 border-t border-white/10 pt-6 text-center">
-              <p className="text-sm text-[var(--color-moncasa-inverse-muted)]">© 2026 Ferretería Moncasa. Todos los derechos reservados. Hecho con ❤️ en Honduras.</p>
-            </div>
+          <footer id="contacto" className="mt-16">
+            <Footer />
           </footer>
       </div>
     </main>

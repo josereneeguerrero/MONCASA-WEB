@@ -196,35 +196,59 @@ textarea:focus-visible {
   }
 }
 
-/* Animation Classes */
+/* Animation Classes - Optimized for smooth rendering */
 .moncasa-fade-in {
-  animation: moncasa-fade-in 600ms ease-out;
+  animation: moncasa-fade-in 600ms ease-out forwards;
+  will-change: opacity;
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
 
 .moncasa-fade-in-up {
-  animation: moncasa-fade-in-up 700ms ease-out;
+  animation: moncasa-fade-in-up 700ms ease-out forwards;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
 
 .moncasa-fade-in-down {
-  animation: moncasa-fade-in-down 700ms ease-out;
+  animation: moncasa-fade-in-down 700ms ease-out forwards;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
 
 .moncasa-slide-in-right {
-  animation: moncasa-slide-in-right 700ms ease-out;
+  animation: moncasa-slide-in-right 700ms ease-out forwards;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
 
 .moncasa-slide-in-left {
-  animation: moncasa-slide-in-left 700ms ease-out;
+  animation: moncasa-slide-in-left 700ms ease-out forwards;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
 
 .moncasa-scale-in {
-  animation: moncasa-scale-in 600ms ease-out;
+  animation: moncasa-scale-in 600ms ease-out forwards;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
 
 .moncasa-bounce-subtle {
   animation: moncasa-bounce-subtle 3s ease-in-out infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
 
 .moncasa-float {
   animation: moncasa-float 3s ease-in-out infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
 }

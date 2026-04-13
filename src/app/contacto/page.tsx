@@ -4,6 +4,7 @@ import { FormEvent, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import BrandLogo from '@/components/brand-logo';
+import Footer from '@/components/footer';
 import { contactSchema } from '@/lib/validation';
 
 type FormData = {
@@ -40,7 +41,7 @@ export default function ContactoPage() {
     const parsed = contactSchema.safeParse(form);
 
     if (!parsed.success) {
-      setMessage(`⚠ ${parsed.error.issues[0]?.message ?? 'Revisa los datos del formulario.'}`);
+      setMessage(`Revisa los datos del formulario: ${parsed.error.issues[0]?.message ?? 'Hay un error.'}`);
       setSubmitting(false);
       return;
     }
@@ -65,11 +66,11 @@ export default function ContactoPage() {
 
       // Éxito
       setForm(emptyForm);
-      setMessage('✓ Mensaje recibido. Nos pondremos en contacto pronto.');
+      setMessage('Mensaje recibido. Nos pondremos en contacto pronto.');
       setTimeout(() => setMessage(''), 4000);
     } catch (err) {
       console.error('Error:', err);
-      setMessage('❌ Hubo un error. Por favor intenta nuevamente.');
+      setMessage('Hubo un error. Por favor intenta nuevamente.');
     } finally {
       setSubmitting(false);
     }
@@ -79,7 +80,7 @@ export default function ContactoPage() {
     <main className="min-h-screen bg-[var(--color-moncasa-page-bg)] px-4 py-4 sm:px-6 lg:px-8">
       <div className="mx-auto min-h-[calc(100vh-2rem)] max-w-7xl overflow-hidden rounded-[2rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] shadow-[0_18px_60px_var(--color-moncasa-shadow)]">
         {/* HEADER */}
-        <header className="border-b border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] px-5 py-4 sm:px-8">
+        <header className="sticky top-0 z-50 border-b border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] px-5 py-4 sm:px-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <Link href="/" className="flex items-center gap-3">
               <BrandLogo className="h-12 w-12 rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] object-cover p-1 shadow-[0_8px_24px_var(--color-moncasa-shadow)]" />
@@ -100,11 +101,13 @@ export default function ContactoPage() {
 
         {/* CONTENIDO */}
         <section className="px-5 py-8 sm:px-8 sm:py-10">
-          <p className="text-sm font-bold uppercase tracking-[0.35em] text-[#FE9A01]">Contacto</p>
-          <h1 className="mt-2 text-4xl font-black tracking-tight text-[var(--color-moncasa-text)] sm:text-5xl">Estamos aquí para ayudarte</h1>
-          <p className="mt-4 max-w-3xl text-lg leading-8 text-[var(--color-moncasa-muted)]">
-            Envíanos tu consulta y nos comunicaremos contigo a la brevedad. También puedes contactarnos directamente vía WhatsApp.
-          </p>
+          <div className="moncasa-fade-in-up" style={{ animationDelay: '100ms' }}>
+            <p className="text-sm font-bold uppercase tracking-[0.35em] text-[#FE9A01]">Contacto</p>
+            <h1 className="mt-2 text-4xl font-black tracking-tight text-[var(--color-moncasa-text)] sm:text-5xl">Estamos aquí para ayudarte</h1>
+            <p className="mt-4 max-w-3xl text-lg leading-8 text-[var(--color-moncasa-muted)]">
+              Envíanos tu consulta y nos comunicaremos contigo a la brevedad. También puedes contactarnos directamente vía WhatsApp.
+            </p>
+          </div>
 
           {/* GRID: FORMULARIO + INFO */}
           <div className="mt-10 grid gap-8 lg:grid-cols-2">
@@ -186,7 +189,7 @@ export default function ContactoPage() {
                 </button>
 
                 {message && (
-                  <p className={`-mt-2 text-sm font-semibold ${message.startsWith('✓') ? 'text-green-600' : message.startsWith('❌') ? 'text-red-600' : 'text-yellow-600'}`}>
+                  <p className={`-mt-2 text-sm font-semibold ${message.includes('Mensaje recibido') ? 'text-green-600' : 'text-red-600'}`}>
                     {message}
                   </p>
                 )}
@@ -263,6 +266,7 @@ export default function ContactoPage() {
           </div>
         </section>
       </div>
+      <Footer />
     </main>
   );
 }
