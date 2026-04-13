@@ -32,6 +32,26 @@ Este crear:
 
 ## 🔑 Paso 3: Configura las APIs
 
+## ✅ Checklist rápido antes de probar
+
+1. Copia `.env.example` a `.env.local`.
+2. Completa las 7 claves de API.
+3. Reinicia `npm run dev`.
+4. Abre la página principal y prueba el botón de autenticación.
+5. Si entras al panel admin, prueba luego el envío de invitación.
+
+## ⚠️ Si aparece Internal Server Error
+
+Revisa primero estas variables en `.env.local`:
+
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+- `CLERK_SECRET_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `RESEND_API_KEY`
+- `RESEND_FROM_EMAIL`
+
+Si falta una sola de estas, el servidor puede responder 500 cuando intentes usar login, admin o invitaciones.
+
 ### Supabase
 1. Ve a `Project Settings > API`.
 2. Copia `Project URL` en `NEXT_PUBLIC_SUPABASE_URL`.
@@ -55,6 +75,13 @@ Este crear:
 1. Copia `.env.example` a `.env.local`.
 2. Completa todas las claves.
 3. Reinicia `npm run dev` después de cambiar variables.
+
+### Orden recomendado de configuración
+1. Supabase: URL, anon key y service role.
+2. Clerk: publishable key y secret key.
+3. Resend: API key y remitente verificado.
+4. Vuelve a probar el login.
+5. Después prueba el panel admin y la invitación por correo.
 
 ---
 

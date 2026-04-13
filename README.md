@@ -42,6 +42,8 @@ RESEND_API_KEY=re_...
 RESEND_FROM_EMAIL="Ferretería Moncasa <no-reply@tu-dominio.com>"
 ```
 
+Si ves un `Internal Server Error` al abrir login, admin o invitaciones, revisa primero esas cinco claves: `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY` y `RESEND_FROM_EMAIL`.
+
 ## Inventario (stock) en productos
 
 Para habilitar el control de inventario en el admin y catálogo, ejecuta este SQL en Supabase:
