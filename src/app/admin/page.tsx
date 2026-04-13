@@ -43,7 +43,7 @@ type AuditLog = {
 type AdminRole = {
   id: string | number;
   email: string;
-  role: string;
+  role: AdminRoleValue;
   activo: boolean;
   created_at: string;
 };
@@ -71,6 +71,31 @@ type FormState = {
 type TabType = 'productos' | 'mensajes' | 'auditoria' | 'seguridad';
 type StatusFilter = 'all' | 'active' | 'inactive' | 'featured' | 'out_of_stock';
 type ProductSortMode = 'manual' | 'name' | 'price_desc' | 'price_asc' | 'stock_desc' | 'stock_asc';
+type AdminRoleValue = 'owner' | 'admin' | 'editor' | 'viewer';
+type AdminRoleFilter = 'all' | AdminRoleValue;
+type AdminRoleStatusFilter = 'all' | 'active' | 'inactive';
+
+const ADMIN_ROLE_ORDER: AdminRoleValue[] = ['owner', 'admin', 'editor', 'viewer'];
+const ADMIN_ROLE_LABELS: Record<AdminRoleValue, string> = {
+  owner: 'Propietario',
+  admin: 'Administrador',
+  editor: 'Editor',
+  viewer: 'Lector',
+};
+const ADMIN_ROLE_PRIORITY: Record<AdminRoleValue, number> = {
+  owner: 4,
+  admin: 3,
+  editor: 2,
+  viewer: 1,
+};
+
+function normalizeAdminRole(value: string): AdminRoleValue {
+  const normalized = value.toLowerCase();
+
+  return ADMIN_ROLE_ORDER.includes(normalized as AdminRoleValue)
+    ? (normalized as AdminRoleValue)
+    : 'admin';
+}
 
 const emptyForm: FormState = {
   category: '',
@@ -111,7 +136,11 @@ export default function AdminPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [sortMode, setSortMode] = useState<ProductSortMode>('manual');
   const [newAdminEmail, setNewAdminEmail] = useState('');
-  const [newAdminRole, setNewAdminRole] = useState('admin');
+  const [newAdminRole, setNewAdminRole] = useState<AdminRoleValue>('admin');
+  const [roleSearchTerm, setRoleSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState<AdminRoleFilter>('all');
+  const [roleStatusFilter, setRoleStatusFilter] = useState<AdminRoleStatusFilter>('all');
+  const [roleActionId, setRoleActionId] = useState<string | number | null>(null);
   const [backupName, setBackupName] = useState('');
 
   const productsTable = useMemo(
@@ -154,6 +183,61 @@ export default function AdminPage() {
 
     return { total, active, inactive, featured, outOfStock };
   }, [products]);
+
+  const normalizedCurrentUserEmail = currentUserEmail.trim().toLowerCase();
+
+  const currentUserRoleRecord = useMemo(
+    () =>
+      adminRoles.find((roleItem) => roleItem.email.trim().toLowerCase() === normalizedCurrentUserEmail) ?? null,
+    [adminRoles, normalizedCurrentUserEmail],
+  );
+
+  const currentUserRole = currentUserRoleRecord ? normalizeAdminRole(currentUserRoleRecord.role) : null;
+  const currentUserRoleLabel = currentUserRole ? ADMIN_ROLE_LABELS[currentUserRole] : 'Sin rol asignado';
+  const currentUserAccessLabel = currentUserRoleRecord?.activo ? 'Acceso activo' : 'Acceso inactivo';
+  const canManageRoles = currentUserRole === 'owner';
+  const canManageBackups = currentUserRole === 'owner' || currentUserRole === 'admin';
+
+  const filteredAdminRoles = useMemo(() => {
+    const query = roleSearchTerm.trim().toLowerCase();
+
+    return [...adminRoles]
+      .filter((roleItem) => {
+        const matchesSearch =
+          !query ||
+          roleItem.email.toLowerCase().includes(query) ||
+          roleItem.role.toLowerCase().includes(query);
+        const matchesRole = roleFilter === 'all' || roleItem.role === roleFilter;
+        const matchesStatus =
+          roleStatusFilter === 'all' ||
+          (roleStatusFilter === 'active' ? roleItem.activo : !roleItem.activo);
+
+        return matchesSearch && matchesRole && matchesStatus;
+      })
+      .sort((a, b) => {
+        if (a.email.trim().toLowerCase() === normalizedCurrentUserEmail) return -1;
+        if (b.email.trim().toLowerCase() === normalizedCurrentUserEmail) return 1;
+
+        const rankDiff =
+          ADMIN_ROLE_PRIORITY[normalizeAdminRole(b.role)] - ADMIN_ROLE_PRIORITY[normalizeAdminRole(a.role)];
+        if (rankDiff !== 0) return rankDiff;
+
+        if (a.activo !== b.activo) {
+          return a.activo ? -1 : 1;
+        }
+
+        return a.email.localeCompare(b.email, 'es');
+      });
+  }, [adminRoles, normalizedCurrentUserEmail, roleFilter, roleSearchTerm, roleStatusFilter]);
+
+  const roleSummary = useMemo(() => {
+    const total = adminRoles.length;
+    const active = adminRoles.filter((roleItem) => roleItem.activo).length;
+    const owners = adminRoles.filter((roleItem) => normalizeAdminRole(roleItem.role) === 'owner').length;
+    const inactive = total - active;
+
+    return { total, active, inactive, owners };
+  }, [adminRoles]);
 
   const canReorder =
     !searchTerm.trim() && statusFilter === 'all' && sortMode === 'manual';
@@ -452,7 +536,7 @@ export default function AdminPage() {
     const normalized = (Array.isArray(data) ? data : []).map((item) => ({
       id: item.id,
       email: String(item.email ?? ''),
-      role: String(item.role ?? 'admin'),
+      role: normalizeAdminRole(String(item.role ?? 'admin')),
       activo: ['true', '1', 't', 'yes'].includes(String(item.activo ?? true).toLowerCase()),
       created_at: String(item.created_at ?? ''),
     }));
@@ -810,6 +894,12 @@ export default function AdminPage() {
   }
 
   async function handleAddAdminRole() {
+    if (!canManageRoles) {
+      setMessage('Solo el propietario puede agregar o modificar roles.');
+      clearMessage();
+      return;
+    }
+
     const email = newAdminEmail.trim().toLowerCase();
 
     if (!email) {
@@ -820,7 +910,7 @@ export default function AdminPage() {
 
     const payload = {
       email,
-      role: newAdminRole,
+      role: normalizeAdminRole(newAdminRole),
       activo: true,
     };
 
@@ -840,7 +930,65 @@ export default function AdminPage() {
     clearMessage();
   }
 
+  async function handleUpdateAdminRole(roleItem: AdminRole, nextRole: AdminRoleValue) {
+    if (!canManageRoles) {
+      setMessage('Solo el propietario puede cambiar roles.');
+      clearMessage();
+      return;
+    }
+
+    if (roleItem.email.trim().toLowerCase() === normalizedCurrentUserEmail) {
+      setMessage('No puedes cambiar tu propio rango desde aquí.');
+      clearMessage();
+      return;
+    }
+
+    setRoleActionId(roleItem.id);
+
+    const { error } = await supabase
+      .from(rolesTable)
+      .update({ role: nextRole, activo: true })
+      .eq('id', roleItem.id);
+
+    if (error) {
+      setRoleActionId(null);
+      setMessage(`No se pudo cambiar el rol: ${error.message}`);
+      clearMessage();
+      return;
+    }
+
+    await loadAdminRoles();
+    void logAudit('rol', 'admin', `Se cambió ${roleItem.email} a rol ${nextRole}`);
+    setMessage(`✓ Rol actualizado a ${ADMIN_ROLE_LABELS[nextRole]}.`);
+    setRoleActionId(null);
+    clearMessage();
+  }
+
   async function handleToggleRoleActive(roleItem: AdminRole) {
+    if (!canManageRoles) {
+      setMessage('Solo el propietario puede activar o desactivar accesos.');
+      clearMessage();
+      return;
+    }
+
+    if (roleItem.email.trim().toLowerCase() === normalizedCurrentUserEmail) {
+      setMessage('No puedes desactivar tu propio acceso desde aquí.');
+      clearMessage();
+      return;
+    }
+
+    const ownerCount = adminRoles.filter(
+      (item) => normalizeAdminRole(item.role) === 'owner' && item.activo,
+    ).length;
+
+    if (normalizeAdminRole(roleItem.role) === 'owner' && roleItem.activo && ownerCount <= 1) {
+      setMessage('No puedes desactivar al último propietario activo.');
+      clearMessage();
+      return;
+    }
+
+    setRoleActionId(roleItem.id);
+
     const nextValue = !roleItem.activo;
 
     const { error } = await supabase
@@ -849,6 +997,7 @@ export default function AdminPage() {
       .eq('id', roleItem.id);
 
     if (error) {
+      setRoleActionId(null);
       setMessage(`No se pudo actualizar estado de rol: ${error.message}`);
       clearMessage();
       return;
@@ -861,10 +1010,60 @@ export default function AdminPage() {
       `${nextValue ? 'Se activó' : 'Se desactivó'} acceso para ${roleItem.email}`,
     );
     setMessage('✓ Estado de rol actualizado.');
+    setRoleActionId(null);
+    clearMessage();
+  }
+
+  async function handleRemoveAdminRole(roleItem: AdminRole) {
+    if (!canManageRoles) {
+      setMessage('Solo el propietario puede eliminar accesos.');
+      clearMessage();
+      return;
+    }
+
+    if (roleItem.email.trim().toLowerCase() === normalizedCurrentUserEmail) {
+      setMessage('No puedes eliminar tu propio acceso desde aquí.');
+      clearMessage();
+      return;
+    }
+
+    const ownerCount = adminRoles.filter((item) => normalizeAdminRole(item.role) === 'owner').length;
+
+    if (normalizeAdminRole(roleItem.role) === 'owner' && ownerCount <= 1) {
+      setMessage('No puedes eliminar al último propietario.');
+      clearMessage();
+      return;
+    }
+
+    if (!window.confirm(`¿Eliminar el acceso de ${roleItem.email}? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    setRoleActionId(roleItem.id);
+
+    const { error } = await supabase.from(rolesTable).delete().eq('id', roleItem.id);
+
+    if (error) {
+      setRoleActionId(null);
+      setMessage(`No se pudo eliminar el acceso: ${error.message}`);
+      clearMessage();
+      return;
+    }
+
+    await loadAdminRoles();
+    void logAudit('rol', 'admin', `Se eliminó el acceso de ${roleItem.email}`);
+    setMessage('✓ Acceso eliminado correctamente.');
+    setRoleActionId(null);
     clearMessage();
   }
 
   async function handleCreateBackup() {
+    if (!canManageBackups) {
+      setMessage('Solo owner o admin pueden crear respaldos.');
+      clearMessage();
+      return;
+    }
+
     const trimmedName = backupName.trim();
     const snapshotName =
       trimmedName || `Backup ${new Date().toLocaleDateString('es-HN')} ${new Date().toLocaleTimeString('es-HN')}`;
@@ -901,6 +1100,12 @@ export default function AdminPage() {
   }
 
   async function handleRestoreBackup(backup: AdminBackup) {
+    if (!canManageBackups) {
+      setMessage('Solo owner o admin pueden restaurar respaldos.');
+      clearMessage();
+      return;
+    }
+
     if (
       !window.confirm(
         `¿Restaurar respaldo "${backup.nombre}"? El catálogo actual será reemplazado por este snapshot.`,
@@ -1056,6 +1261,11 @@ export default function AdminPage() {
             </Link>
 
             <div className="flex flex-wrap gap-3 text-sm font-semibold text-[var(--color-moncasa-text-weak)]">
+              <div className="rounded-full border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] px-4 py-2 text-xs text-[var(--color-moncasa-muted)]">
+                <span className="font-bold text-[var(--color-moncasa-text)]">{currentUserEmail || 'Sin sesión'}</span>
+                <span className="mx-2 text-[var(--color-moncasa-muted-strong)]">·</span>
+                <span>{currentUserRoleLabel}</span>
+              </div>
               <Link href="/productos" className="rounded-full border border-[var(--color-moncasa-border)] px-4 py-2 transition hover:bg-[var(--color-moncasa-hover)]">
                 Ver catálogo
               </Link>
@@ -1913,6 +2123,50 @@ export default function AdminPage() {
                 Define qué correos pueden administrar el panel y su nivel de acceso.
               </p>
 
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-3">
+                  <p className="text-xs text-[var(--color-moncasa-muted)]">Tu usuario</p>
+                  <p className="mt-1 break-all text-sm font-semibold text-[var(--color-moncasa-text)]">
+                    {currentUserEmail || 'Sin sesión'}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-3">
+                  <p className="text-xs text-[var(--color-moncasa-muted)]">Tu rango</p>
+                  <p className="mt-1 text-sm font-semibold text-[var(--color-moncasa-text)]">{currentUserRoleLabel}</p>
+                </div>
+                <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-3">
+                  <p className="text-xs text-[var(--color-moncasa-muted)]">Estado</p>
+                  <p className={`mt-1 text-sm font-semibold ${currentUserRoleRecord?.activo ? 'text-green-400' : 'text-red-400'}`}>
+                    {currentUserAccessLabel}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-4">
+                <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-3">
+                  <p className="text-xs text-[var(--color-moncasa-muted)]">Total</p>
+                  <p className="mt-1 text-xl font-black text-[var(--color-moncasa-text)]">{roleSummary.total}</p>
+                </div>
+                <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-3">
+                  <p className="text-xs text-[var(--color-moncasa-muted)]">Activos</p>
+                  <p className="mt-1 text-xl font-black text-green-400">{roleSummary.active}</p>
+                </div>
+                <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-3">
+                  <p className="text-xs text-[var(--color-moncasa-muted)]">Inactivos</p>
+                  <p className="mt-1 text-xl font-black text-red-400">{roleSummary.inactive}</p>
+                </div>
+                <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-3">
+                  <p className="text-xs text-[var(--color-moncasa-muted)]">Owners</p>
+                  <p className="mt-1 text-xl font-black text-[#FE9A01]">{roleSummary.owners}</p>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-3 text-xs text-[var(--color-moncasa-muted)]">
+                {canManageRoles
+                  ? 'Tienes permisos de propietario para cambiar o quitar accesos.'
+                  : 'Tu cuenta puede ver la información, pero solo el propietario puede cambiar o quitar roles.'}
+              </div>
+
               <div className="mt-4 grid gap-3 sm:grid-cols-[1.2fr_0.8fr_auto]">
                 <input
                   value={newAdminEmail}
@@ -1922,7 +2176,7 @@ export default function AdminPage() {
                 />
                 <select
                   value={newAdminRole}
-                  onChange={(event) => setNewAdminRole(event.target.value)}
+                  onChange={(event) => setNewAdminRole(normalizeAdminRole(event.target.value))}
                   className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]/50"
                 >
                   <option value="owner">owner</option>
@@ -1933,38 +2187,109 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={() => void handleAddAdminRole()}
-                  className="rounded-xl bg-[#FE9A01] px-4 py-2 text-sm font-bold text-[#0A1116] transition hover:brightness-95"
+                  disabled={!canManageRoles}
+                  className="rounded-xl bg-[#FE9A01] px-4 py-2 text-sm font-bold text-[#0A1116] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Guardar
                 </button>
               </div>
 
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <input
+                  value={roleSearchTerm}
+                  onChange={(event) => setRoleSearchTerm(event.target.value)}
+                  placeholder="Buscar por correo o rango"
+                  className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none placeholder:text-[var(--color-moncasa-muted)] focus:border-[#FE9A01]/50"
+                />
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <select
+                    value={roleFilter}
+                    onChange={(event) => setRoleFilter(event.target.value as AdminRoleFilter)}
+                    className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]/50"
+                  >
+                    <option value="all">Todos los rangos</option>
+                    <option value="owner">Owner</option>
+                    <option value="admin">Admin</option>
+                    <option value="editor">Editor</option>
+                    <option value="viewer">Viewer</option>
+                  </select>
+                  <select
+                    value={roleStatusFilter}
+                    onChange={(event) => setRoleStatusFilter(event.target.value as AdminRoleStatusFilter)}
+                    className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]/50"
+                  >
+                    <option value="all">Todos los estados</option>
+                    <option value="active">Activos</option>
+                    <option value="inactive">Inactivos</option>
+                  </select>
+                </div>
+              </div>
+
               <div className="mt-5 space-y-2">
-                {adminRoles.length > 0 ? (
-                  adminRoles.map((roleItem) => (
+                {filteredAdminRoles.length > 0 ? (
+                  filteredAdminRoles.map((roleItem) => (
                     <div
                       key={roleItem.id}
-                      className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-3"
+                      className="space-y-3 rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-3"
                     >
-                      <div>
-                        <p className="text-sm font-semibold text-[var(--color-moncasa-text)]">{roleItem.email}</p>
-                        <p className="text-xs text-[var(--color-moncasa-muted)]">Rol: {roleItem.role}</p>
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <p className="break-all text-sm font-semibold text-[var(--color-moncasa-text)]">{roleItem.email}</p>
+                          <p className="text-xs text-[var(--color-moncasa-muted)]">
+                            Rol actual: {ADMIN_ROLE_LABELS[normalizeAdminRole(roleItem.role)]}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <span className={`rounded-full px-2 py-1 text-[10px] font-bold ${roleItem.activo ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                            {roleItem.activo ? 'Activo' : 'Inactivo'}
+                          </span>
+                          <span className="rounded-full bg-[#FE9A01]/20 px-2 py-1 text-[10px] font-bold text-[#FE9A01]">
+                            {ADMIN_ROLE_LABELS[normalizeAdminRole(roleItem.role)]}
+                          </span>
+                        </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => void handleToggleRoleActive(roleItem)}
-                        className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
-                          roleItem.activo
-                            ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
-                            : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-                        }`}
-                      >
-                        {roleItem.activo ? 'Activo' : 'Inactivo'}
-                      </button>
+                      <div className="grid gap-2 sm:grid-cols-[1.2fr_auto_auto]">
+                        <label className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                          Rango
+                          <select
+                            value={normalizeAdminRole(roleItem.role)}
+                            onChange={(event) => void handleUpdateAdminRole(roleItem, normalizeAdminRole(event.target.value))}
+                            disabled={!canManageRoles || roleActionId === roleItem.id}
+                            className="mt-2 w-full rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]/50 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <option value="owner">Owner</option>
+                            <option value="admin">Admin</option>
+                            <option value="editor">Editor</option>
+                            <option value="viewer">Viewer</option>
+                          </select>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => void handleToggleRoleActive(roleItem)}
+                          disabled={!canManageRoles || roleActionId === roleItem.id}
+                          className={`rounded-lg px-3 py-1 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                            roleItem.activo
+                              ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+                              : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                          }`}
+                        >
+                          {roleActionId === roleItem.id ? 'Guardando...' : roleItem.activo ? 'Desactivar' : 'Activar'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleRemoveAdminRole(roleItem)}
+                          disabled={!canManageRoles || roleActionId === roleItem.id}
+                          className="rounded-lg bg-red-600/20 px-3 py-1 text-xs font-semibold text-red-400 transition hover:bg-red-600/30 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Quitar acceso
+                        </button>
+                      </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-[var(--color-moncasa-muted)]">Sin roles cargados o tabla no configurada.</p>
+                  <p className="text-sm text-[var(--color-moncasa-muted)]">
+                    Sin coincidencias. Revisa el filtro o confirma que la tabla esté configurada.
+                  </p>
                 )}
               </div>
             </div>
@@ -1986,11 +2311,18 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={() => void handleCreateBackup()}
-                  className="rounded-xl bg-[#FE9A01] px-4 py-2 text-sm font-bold text-[#0A1116] transition hover:brightness-95"
+                  disabled={!canManageBackups}
+                  className="rounded-xl bg-[#FE9A01] px-4 py-2 text-sm font-bold text-[#0A1116] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Crear
                 </button>
               </div>
+
+              <p className="mt-2 text-xs text-[var(--color-moncasa-muted)]">
+                {canManageBackups
+                  ? 'Puedes crear y restaurar respaldos con tu nivel actual.'
+                  : 'Solo owner o admin pueden usar respaldos.'}
+              </p>
 
               <div className="mt-5 space-y-2">
                 {backups.length > 0 ? (
@@ -2007,7 +2339,7 @@ export default function AdminPage() {
                       </div>
                       <button
                         type="button"
-                        disabled={restoringBackup}
+                        disabled={restoringBackup || !canManageBackups}
                         onClick={() => void handleRestoreBackup(backup)}
                         className="rounded-lg border border-[var(--color-moncasa-border)] px-3 py-1 text-xs font-semibold text-[var(--color-moncasa-text)] transition hover:bg-[var(--color-moncasa-hover)] disabled:opacity-60"
                       >
