@@ -2031,72 +2031,72 @@ export default function AdminPage() {
 
             {/* CATÁLOGO */}
             <div className="rounded-[1.75rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-6">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div className="flex flex-col gap-6">
                 <div>
                   <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#FE9A01]">Productos registrados</p>
-                  <h2 className="mt-2 text-3xl font-black text-[var(--color-moncasa-text)]">Catálogo actual</h2>
-                  <p className="mt-1 text-xs text-[var(--color-moncasa-muted)]">
-                    {filteredProducts.length} de {products.length} producto{products.length !== 1 ? 's' : ''}
+                  <h2 className="mt-2 text-4xl font-black text-[var(--color-moncasa-text)]">Catálogo actual</h2>
+                  <p className="mt-3 text-sm text-[var(--color-moncasa-muted)]">
+                    <span className="font-bold text-[var(--color-moncasa-text)]">{filteredProducts.length} de {products.length}</span> producto{products.length !== 1 ? 's' : ''} registrado{products.length !== 1 ? 's' : ''}
                   </p>
-                  <p className="mt-1 text-xs text-[var(--color-moncasa-muted)]">
-                    Arrastra tarjetas para reordenar. Destacados siempre van primero.
+                  <p className="mt-2 text-xs text-[var(--color-moncasa-muted-strong)] font-medium">
+                    💡 Arrastra tarjetas para reordenar. Los destacados siempre van primero.
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
                   <button
                     type="button"
                     onClick={() => void loadProducts()}
-                    className="rounded-lg border border-[var(--color-moncasa-border)] px-3 py-2 text-xs font-semibold text-[var(--color-moncasa-text)] transition hover:bg-[var(--color-moncasa-hover)]"
+                    className="rounded-xl border border-[var(--color-moncasa-border)] px-4 py-3 text-sm font-semibold text-[var(--color-moncasa-text)] transition hover:bg-[var(--color-moncasa-hover)] hover:border-[var(--color-moncasa-text)]"
                   >
-                    Recargar
+                    🔄 Recargar
                   </button>
                   <button
                     type="button"
                     onClick={handleExportCsv}
                     disabled={products.length === 0}
-                    className="rounded-lg border border-[var(--color-moncasa-border)] px-3 py-2 text-xs font-semibold text-[var(--color-moncasa-text)] transition hover:bg-[var(--color-moncasa-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-xl border border-[var(--color-moncasa-border)] px-4 py-3 text-sm font-semibold text-[var(--color-moncasa-text)] transition hover:bg-[var(--color-moncasa-hover)] hover:border-[var(--color-moncasa-text)] disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Exportar CSV
+                    📥 CSV
                   </button>
                   <button
                     type="button"
                     onClick={handleSaveOrder}
                     disabled={savingOrder || products.length === 0}
-                    className="rounded-lg bg-[#FE9A01]/20 px-3 py-2 text-xs font-semibold text-[#FE9A01] transition hover:bg-[#FE9A01]/30 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-xl bg-[#FE9A01] px-4 py-3 text-sm font-bold text-[#0A1116] transition hover:brightness-95 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {savingOrder ? 'Guardando orden...' : 'Guardar orden'}
+                    {savingOrder ? '⏳ Guardando...' : '💾 Guardar'}
                   </button>
                   <button
                     type="button"
                     onClick={handleClearAll}
                     disabled={submitting || products.length === 0}
-                    className="rounded-lg bg-red-600/20 px-3 py-2 text-xs font-semibold text-red-400 transition hover:bg-red-600/30 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-xl bg-red-600/20 px-4 py-3 text-sm font-semibold text-red-400 transition hover:bg-red-600/30 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Vaciar catálogo
+                    🗑️ Vaciar
                   </button>
                 </div>
               </div>
 
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-                <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-3">
-                  <p className="text-xs text-[var(--color-moncasa-muted)]">Total</p>
-                  <p className="mt-1 text-xl font-black text-[var(--color-moncasa-text)]">{dashboardStats.total}</p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                <div className="rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-4 hover:border-[#FE9A01]/30 transition">
+                  <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[var(--color-moncasa-muted)]">Total</p>
+                  <p className="mt-2 text-2xl font-black text-[var(--color-moncasa-text)]">{dashboardStats.total}</p>
                 </div>
-                <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-3">
-                  <p className="text-xs text-[var(--color-moncasa-muted)]">Activos</p>
-                  <p className="mt-1 text-xl font-black text-green-400">{dashboardStats.active}</p>
+                <div className="rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-4 hover:border-green-400/30 transition">
+                  <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[var(--color-moncasa-muted)]">Activos</p>
+                  <p className="mt-2 text-2xl font-black text-green-400">{dashboardStats.active}</p>
                 </div>
-                <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-3">
-                  <p className="text-xs text-[var(--color-moncasa-muted)]">Inactivos</p>
-                  <p className="mt-1 text-xl font-black text-red-400">{dashboardStats.inactive}</p>
+                <div className="rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-4 hover:border-red-400/30 transition">
+                  <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[var(--color-moncasa-muted)]">Inactivos</p>
+                  <p className="mt-2 text-2xl font-black text-red-400">{dashboardStats.inactive}</p>
                 </div>
-                <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-3">
-                  <p className="text-xs text-[var(--color-moncasa-muted)]">Destacados</p>
-                  <p className="mt-1 text-xl font-black text-[#FE9A01]">{dashboardStats.featured}</p>
+                <div className="rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-4 hover:border-[#FE9A01]/50 transition">
+                  <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[var(--color-moncasa-muted)]">Destacados</p>
+                  <p className="mt-2 text-2xl font-black text-[#FE9A01]">{dashboardStats.featured}</p>
                 </div>
-                <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-3">
-                  <p className="text-xs text-[var(--color-moncasa-muted)]">Sin inventario</p>
-                  <p className="mt-1 text-xl font-black text-red-400">{dashboardStats.outOfStock}</p>
+                <div className="rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-4 hover:border-red-400/30 transition">
+                  <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[var(--color-moncasa-muted)]">Sin inventario</p>
+                  <p className="mt-2 text-2xl font-black text-red-400">{dashboardStats.outOfStock}</p>
                 </div>
               </div>
 
@@ -2149,25 +2149,27 @@ export default function AdminPage() {
                       onDragOver={(event) => event.preventDefault()}
                       onDrop={() => handleDrop(product.id)}
                       onDragEnd={() => setDraggingProductId(null)}
-                      className="relative rounded-[1.5rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-5 transition hover:border-[#FE9A01]/30"
+                      className="relative rounded-[2rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-6 transition hover:border-[#FE9A01]/50 hover:shadow-md"
                     >
-                      <span className="absolute right-3 top-3 select-none text-xs text-[var(--color-moncasa-muted)]">
-                        {draggingProductId === product.id ? 'Moviendo...' : 'Arrastrar'}
+                      <span className="absolute right-4 top-4 select-none text-xs font-semibold text-[var(--color-moncasa-muted)] bg-[var(--color-moncasa-page-bg)] px-2 py-1 rounded-lg">
+                        {draggingProductId === product.id ? '✋ Moviendo...' : '☞ Arrastrar'}
                       </span>
-                      <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#FE9A01]">{product.categoria || '—'}</p>
-                      <h3 className="mt-2 text-2xl font-black text-[var(--color-moncasa-text)]">{product.nombre || 'Sin nombre'}</h3>
+                      <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#FE9A01]">{product.categoria || '—'}</p>
+                      <h3 className="mt-2 text-2xl font-black text-[var(--color-moncasa-text)] line-clamp-2">{product.nombre || 'Sin nombre'}</h3>
                       <p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--color-moncasa-muted)]">{product.descripcion || 'Sin descripción'}</p>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        <span className={`rounded-full px-2 py-1 text-[10px] font-bold ${product.activo ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                          {product.activo ? 'Activo' : 'Inactivo'}
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <span className={`rounded-full px-3 py-1 text-xs font-bold ${
+                          product.activo ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                        }`}>
+                          {product.activo ? '✓ Activo' : '✕ Inactivo'}
                         </span>
                         {product.destacado ? (
-                          <span className="rounded-full bg-[#FE9A01]/20 px-2 py-1 text-[10px] font-bold text-[#FE9A01]">
-                            Destacado
+                          <span className="rounded-full bg-[#FE9A01]/20 px-3 py-1 text-xs font-bold text-[#FE9A01]">
+                            ⭐ Destacado
                           </span>
                         ) : null}
-                        <span className="rounded-full border border-[var(--color-moncasa-border)] px-2 py-1 text-[10px] font-bold text-[var(--color-moncasa-muted)]">
-                          Orden {product.orden}
+                        <span className="rounded-full border border-[var(--color-moncasa-border)] px-3 py-1 text-xs font-bold text-[var(--color-moncasa-muted)]">
+                          #{product.orden}
                         </span>
                       </div>
                       {product.precio ? <p className="mt-4 text-lg font-bold text-[#FE9A01]">L {product.precio}</p> : null}
@@ -2175,65 +2177,65 @@ export default function AdminPage() {
                         className={`mt-1 text-xs font-semibold ${
                           Number.parseInt(product.stock, 10) > 0
                             ? 'text-[var(--color-moncasa-muted)]'
-                            : 'text-red-400'
+                            : 'text-red-400 font-bold'
                         }`}
                       >
                         {Number.parseInt(product.stock, 10) > 0
-                          ? `Stock: ${product.stock}`
-                          : 'Sin inventario'}
+                          ? `📦 Stock: ${product.stock}`
+                          : '⚠️ Sin inventario'}
                       </p>
 
-                      <div className="mt-4 flex items-center justify-between gap-2">
+                      <div className="mt-5 flex flex-col gap-2 border-t border-[var(--color-moncasa-border)] pt-4">
                         {product.imagen_url ? (
                           <a
                             href={product.imagen_url}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-xs text-[var(--color-moncasa-muted)] underline decoration-[var(--color-moncasa-muted)] underline-offset-2 transition hover:text-[var(--color-moncasa-text)]"
+                            className="text-xs text-[#FE9A01] font-semibold underline hover:no-underline transition"
                           >
-                            Ver imagen
+                            🖼️ Ver imagen
                           </a>
                         ) : (
-                          <span className="text-xs text-[var(--color-moncasa-muted-strong)]">Sin imagen</span>
+                          <span className="text-xs text-[var(--color-moncasa-muted-strong)] font-medium">📭 Sin imagen</span>
                         )}
 
-                        <div className="flex flex-wrap gap-2">
+                        <div className="grid grid-cols-2 gap-2 mt-2">
                           <button
                             type="button"
                             onClick={() => void handleToggleActive(product)}
-                            className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
+                            className={`rounded-xl px-3 py-2 text-xs font-bold transition ${
                               product.activo
                                 ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
                                 : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
                             }`}
                           >
-                            {product.activo ? 'Desactivar' : 'Activar'}
+                            {product.activo ? '✓ Activo' : '◯ Inactivo'}
                           </button>
                           <button
                             type="button"
                             onClick={() => void handleToggleFeatured(product)}
-                            className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
+                            className={`rounded-xl px-3 py-2 text-xs font-bold transition ${
                               product.destacado
                                 ? 'bg-[#FE9A01]/20 text-[#FE9A01] hover:bg-[#FE9A01]/30'
                                 : 'border border-[var(--color-moncasa-border)] text-[var(--color-moncasa-muted)] hover:bg-[var(--color-moncasa-hover)]'
                             }`}
                           >
-                            {product.destacado ? 'Quitar destacado' : 'Destacar'}
+                            {product.destacado ? '⭐ Destacado' : '☆ Destacar'}
                           </button>
                           <button
                             type="button"
                             onClick={() => startEdit(product)}
-                            className="rounded-lg bg-[#FE9A01]/20 px-3 py-1 text-xs font-semibold text-[#FE9A01] transition hover:bg-[#FE9A01]/30"
+                            className="rounded-xl bg-[#FE9A01] px-3 py-2 text-xs font-bold text-[#0A1116] transition hover:brightness-95"
                           >
-                            Editar
+                            ✏️ Editar
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDelete(product.id)}
                             disabled={deleting === product.id}
-                            className="rounded-lg bg-red-600/20 px-3 py-1 text-xs font-semibold text-red-400 transition hover:bg-red-600/30 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="rounded-xl bg-red-600/20 px-3 py-2 text-xs font-bold text-red-400 transition hover:bg-red-600/30 disabled:cursor-not-allowed disabled:opacity-50"
                           >
-                            {deleting === product.id ? 'Eliminando...' : 'Eliminar'}
+                            {deleting === product.id ? '⏳ ...' : '🗑️ Eliminar'}
                           </button>
                         </div>
                       </div>
@@ -2254,23 +2256,25 @@ export default function AdminPage() {
         {/* CONTENIDO PRINCIPAL - TAB MENSAJES */}
         {activeTab === 'mensajes' && (
           <section className="px-6 py-8 sm:px-8">
-            <div className="mb-6">
+            <div className="mb-8">
               <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#FE9A01]">Mensajes de contacto</p>
-              <h2 className="mt-2 text-3xl font-black text-[var(--color-moncasa-text)]">Bandeja de entrada</h2>
-              <p className="mt-1 text-sm text-[var(--color-moncasa-muted)]">
-                Total: {mensajes.length} mensaj{mensajes.length !== 1 ? 'es' : 'e'} · Mostrando {filteredMensajes.length}
+              <h2 className="mt-2 text-4xl font-black text-[var(--color-moncasa-text)]">Bandeja de entrada</h2>
+              <p className="mt-3 text-sm text-[var(--color-moncasa-muted)]">
+                <span className="font-bold text-[var(--color-moncasa-text)]">{filteredMensajes.length}</span> de {mensajes.length} mensaj{mensajes.length !== 1 ? 'es' : 'e'}
               </p>
             </div>
 
-            <div className="mb-6 grid gap-3 rounded-[1.5rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4 lg:grid-cols-[1.2fr_0.8fr_0.8fr_auto]">
-              <input
-                value={messageSearchTerm}
-                onChange={(event) => setMessageSearchTerm(event.target.value)}
-                placeholder="Buscar por nombre, email, asunto o mensaje"
-                className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none placeholder:text-[var(--color-moncasa-muted)] focus:border-[#FE9A01]/50"
-              />
-              <label className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
-                Desde
+            <div className="mb-6 grid gap-3 rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-5 lg:grid-cols-[1.2fr_0.8fr_0.8fr_auto]">
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)] block mb-2">Buscar</label>
+                <input
+                  value={messageSearchTerm}
+                  onChange={(event) => setMessageSearchTerm(event.target.value)}
+                  placeholder="Nombre, email, asunto..."
+                  className="w-full rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-4 py-2 text-sm text-[var(--color-moncasa-text)] outline-none placeholder:text-[var(--color-moncasa-muted)] focus:border-[#FE9A01]/50"
+                />
+              </div>
+              <label className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">Desde
                 <input
                   type="date"
                   value={messageDateFilter.from}
@@ -2278,8 +2282,7 @@ export default function AdminPage() {
                   className="mt-2 w-full rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]/50"
                 />
               </label>
-              <label className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
-                Hasta
+              <label className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">Hasta
                 <input
                   type="date"
                   value={messageDateFilter.to}
@@ -2287,14 +2290,16 @@ export default function AdminPage() {
                   className="mt-2 w-full rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]/50"
                 />
               </label>
-              <button
-                type="button"
-                onClick={() => void handleClearMessages()}
-                disabled={clearingMessages || mensajes.length === 0}
-                className="rounded-xl bg-red-600/20 px-4 py-2 text-sm font-bold text-red-400 transition hover:bg-red-600/30 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {clearingMessages ? 'Limpiando...' : 'Limpiar mensajes'}
-              </button>
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  onClick={() => void handleClearMessages()}
+                  disabled={clearingMessages || mensajes.length === 0}
+                  className="w-full rounded-xl bg-red-600/20 px-4 py-2 text-sm font-bold text-red-400 transition hover:bg-red-600/30 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {clearingMessages ? '⏳ Limpiando...' : '🗑️ Limpiar'}
+                </button>
+              </div>
             </div>
 
             {groupedMensajes.length > 0 ? (
