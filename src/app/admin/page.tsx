@@ -74,6 +74,10 @@ type ProductSortMode = 'manual' | 'name' | 'price_desc' | 'price_asc' | 'stock_d
 type AdminRoleValue = 'owner' | 'admin' | 'editor' | 'viewer';
 type AdminRoleFilter = 'all' | AdminRoleValue;
 type AdminRoleStatusFilter = 'all' | 'active' | 'inactive';
+type DateRangeFilter = {
+  from: string;
+  to: string;
+};
 
 const ADMIN_ROLE_ORDER: AdminRoleValue[] = ['owner', 'admin', 'editor', 'viewer'];
 const ADMIN_ROLE_LABELS: Record<AdminRoleValue, string> = {
@@ -135,6 +139,12 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<TabType>('productos');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [sortMode, setSortMode] = useState<ProductSortMode>('manual');
+  const [messageSearchTerm, setMessageSearchTerm] = useState('');
+  const [messageDateFilter, setMessageDateFilter] = useState<DateRangeFilter>({ from: '', to: '' });
+  const [auditSearchTerm, setAuditSearchTerm] = useState('');
+  const [auditDateFilter, setAuditDateFilter] = useState<DateRangeFilter>({ from: '', to: '' });
+  const [clearingMessages, setClearingMessages] = useState(false);
+  const [clearingAuditLogs, setClearingAuditLogs] = useState(false);
   const [newAdminEmail, setNewAdminEmail] = useState('');
   const [newAdminRole, setNewAdminRole] = useState<AdminRoleValue>('admin');
   const [roleSearchTerm, setRoleSearchTerm] = useState('');
@@ -238,6 +248,76 @@ export default function AdminPage() {
 
     return { total, active, inactive, owners };
   }, [adminRoles]);
+
+  const filteredMensajes = useMemo(() => {
+    const query = messageSearchTerm.trim().toLowerCase();
+
+    return mensajes.filter((msg) => {
+      const createdAt = msg.created_at ? new Date(msg.created_at) : null;
+      const createdStamp = createdAt && !Number.isNaN(createdAt.getTime()) ? createdAt : null;
+      const dateValue = createdStamp ? createdStamp.toISOString().slice(0, 10) : '';
+
+      const matchesSearch =
+        !query ||
+        msg.nombre.toLowerCase().includes(query) ||
+        msg.email.toLowerCase().includes(query) ||
+        (msg.asunto ?? '').toLowerCase().includes(query) ||
+        msg.mensaje.toLowerCase().includes(query);
+
+      const matchesFrom = !messageDateFilter.from || (dateValue && dateValue >= messageDateFilter.from);
+      const matchesTo = !messageDateFilter.to || (dateValue && dateValue <= messageDateFilter.to);
+
+      return matchesSearch && matchesFrom && matchesTo;
+    });
+  }, [messageDateFilter.from, messageDateFilter.to, messageSearchTerm, mensajes]);
+
+  const groupedMensajes = useMemo(() => {
+    const groups = new Map<string, Mensaje[]>();
+
+    filteredMensajes.forEach((msg) => {
+      const dateKey = msg.created_at ? new Date(msg.created_at).toLocaleDateString('es-HN') : 'Sin fecha';
+      const current = groups.get(dateKey) ?? [];
+      current.push(msg);
+      groups.set(dateKey, current);
+    });
+
+    return Array.from(groups.entries());
+  }, [filteredMensajes]);
+
+  const filteredAuditLogs = useMemo(() => {
+    const query = auditSearchTerm.trim().toLowerCase();
+
+    return auditLogs.filter((log) => {
+      const createdAt = log.created_at ? new Date(log.created_at) : null;
+      const createdStamp = createdAt && !Number.isNaN(createdAt.getTime()) ? createdAt : null;
+      const dateValue = createdStamp ? createdStamp.toISOString().slice(0, 10) : '';
+
+      const matchesSearch =
+        !query ||
+        log.accion.toLowerCase().includes(query) ||
+        log.entidad.toLowerCase().includes(query) ||
+        log.detalle.toLowerCase().includes(query) ||
+        log.usuario_email.toLowerCase().includes(query);
+
+      const matchesFrom = !auditDateFilter.from || (dateValue && dateValue >= auditDateFilter.from);
+      const matchesTo = !auditDateFilter.to || (dateValue && dateValue <= auditDateFilter.to);
+
+      return matchesSearch && matchesFrom && matchesTo;
+    });
+  }, [auditDateFilter.from, auditDateFilter.to, auditSearchTerm, auditLogs]);
+
+  const groupedAuditLogs = useMemo(() => {
+    const groups = new Map<string, AuditLog[]>();
+
+    filteredAuditLogs.forEach((log) => {
+      const dateKey = log.created_at ? new Date(log.created_at).toLocaleDateString('es-HN') : 'Sin fecha';
+      const current = groups.get(dateKey) ?? [];
+      current.push(log);
+      groups.set(dateKey, current);
+    });
+
+    return Array.from(groups.entries());
+  }, [filteredAuditLogs]);
 
   const canReorder =
     !searchTerm.trim() && statusFilter === 'all' && sortMode === 'manual';
@@ -521,6 +601,16 @@ export default function AdminPage() {
 
     setAuditLogs(normalized);
   }, [auditLogsTable]);
+
+  const clearMessageFilters = useCallback(() => {
+    setMessageSearchTerm('');
+    setMessageDateFilter({ from: '', to: '' });
+  }, []);
+
+  const clearAuditFilters = useCallback(() => {
+    setAuditSearchTerm('');
+    setAuditDateFilter({ from: '', to: '' });
+  }, []);
 
   const loadAdminRoles = useCallback(async () => {
     const { data, error } = await supabase
@@ -1152,6 +1242,53 @@ export default function AdminPage() {
     void logAudit('restore', 'catalogo', `Se restauró respaldo: ${backup.nombre}`);
     setMessage(`✓ Respaldo restaurado: ${backup.nombre}`);
     setRestoringBackup(false);
+    clearMessage();
+  }
+
+  async function handleClearMessages() {
+    if (!window.confirm('¿Borrar todos los mensajes de contacto? Esta acción no se puede deshacer.')) {
+      return;
+    }
+
+    setClearingMessages(true);
+
+    const { error } = await supabase.from('contactos').delete().neq('id', -1);
+
+    if (error) {
+      setMessage(`No se pudieron borrar los mensajes: ${error.message}`);
+      setClearingMessages(false);
+      clearMessage();
+      return;
+    }
+
+    await loadMensajes();
+    clearMessageFilters();
+    setMessage('✓ Mensajes limpiados correctamente.');
+    void logAudit('limpieza', 'mensajes', 'Se limpiaron todos los mensajes de contacto.');
+    setClearingMessages(false);
+    clearMessage();
+  }
+
+  async function handleClearAuditLogs() {
+    if (!window.confirm('¿Borrar toda la auditoría? Esta acción no se puede deshacer.')) {
+      return;
+    }
+
+    setClearingAuditLogs(true);
+
+    const { error } = await supabase.from(auditLogsTable).delete().neq('id', -1);
+
+    if (error) {
+      setMessage(`No se pudo borrar la auditoría: ${error.message}`);
+      setClearingAuditLogs(false);
+      clearMessage();
+      return;
+    }
+
+    await loadAuditLogs();
+    clearAuditFilters();
+    setMessage('✓ Auditoría limpiada correctamente.');
+    setClearingAuditLogs(false);
     clearMessage();
   }
 
@@ -1995,13 +2132,55 @@ export default function AdminPage() {
               <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#FE9A01]">Mensajes de contacto</p>
               <h2 className="mt-2 text-3xl font-black text-[var(--color-moncasa-text)]">Bandeja de entrada</h2>
               <p className="mt-1 text-sm text-[var(--color-moncasa-muted)]">
-                Total: {mensajes.length} mensaj{mensajes.length !== 1 ? 'es' : 'e'}
+                Total: {mensajes.length} mensaj{mensajes.length !== 1 ? 'es' : 'e'} · Mostrando {filteredMensajes.length}
               </p>
             </div>
 
-            {mensajes.length > 0 ? (
-              <div className="grid gap-4">
-                {mensajes.map((msg) => {
+            <div className="mb-6 grid gap-3 rounded-[1.5rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4 lg:grid-cols-[1.2fr_0.8fr_0.8fr_auto]">
+              <input
+                value={messageSearchTerm}
+                onChange={(event) => setMessageSearchTerm(event.target.value)}
+                placeholder="Buscar por nombre, email, asunto o mensaje"
+                className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none placeholder:text-[var(--color-moncasa-muted)] focus:border-[#FE9A01]/50"
+              />
+              <label className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                Desde
+                <input
+                  type="date"
+                  value={messageDateFilter.from}
+                  onChange={(event) => setMessageDateFilter((current) => ({ ...current, from: event.target.value }))}
+                  className="mt-2 w-full rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]/50"
+                />
+              </label>
+              <label className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                Hasta
+                <input
+                  type="date"
+                  value={messageDateFilter.to}
+                  onChange={(event) => setMessageDateFilter((current) => ({ ...current, to: event.target.value }))}
+                  className="mt-2 w-full rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]/50"
+                />
+              </label>
+              <button
+                type="button"
+                onClick={() => void handleClearMessages()}
+                disabled={clearingMessages || mensajes.length === 0}
+                className="rounded-xl bg-red-600/20 px-4 py-2 text-sm font-bold text-red-400 transition hover:bg-red-600/30 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {clearingMessages ? 'Limpiando...' : 'Limpiar mensajes'}
+              </button>
+            </div>
+
+            {groupedMensajes.length > 0 ? (
+              <div className="space-y-6">
+                {groupedMensajes.map(([dateLabel, messagesByDate]) => (
+                  <div key={dateLabel} className="space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className="text-sm font-bold uppercase tracking-[0.25em] text-[#FE9A01]">{dateLabel}</h3>
+                      <span className="text-xs text-[var(--color-moncasa-muted)]">{messagesByDate.length} mensaje{messagesByDate.length !== 1 ? 's' : ''}</span>
+                    </div>
+                    <div className="grid gap-4">
+                      {messagesByDate.map((msg) => {
                   const fecha = new Date(msg.created_at).toLocaleDateString('es-HN', {
                     year: 'numeric',
                     month: 'short',
@@ -2050,10 +2229,13 @@ export default function AdminPage() {
                     </article>
                   );
                 })}
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
               <div className="rounded-[1.5rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] px-6 py-12 text-center">
-                <p className="text-lg text-[var(--color-moncasa-muted)]">No hay mensajes aún.</p>
+                <p className="text-lg text-[var(--color-moncasa-muted)]">No hay mensajes para este filtro.</p>
                 <p className="mt-2 text-sm text-[var(--color-moncasa-muted-strong)]">
                   Los mensajes del formulario de contacto aparecerán aquí.
                 </p>
@@ -2070,18 +2252,62 @@ export default function AdminPage() {
                 <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#FE9A01]">Auditoría</p>
                 <h2 className="mt-2 text-3xl font-black text-[var(--color-moncasa-text)]">Historial de cambios</h2>
               </div>
-              <button
-                type="button"
-                onClick={() => void loadAuditLogs()}
-                className="rounded-lg border border-[var(--color-moncasa-border)] px-3 py-2 text-xs font-semibold text-[var(--color-moncasa-text)] transition hover:bg-[var(--color-moncasa-hover)]"
-              >
-                Recargar
-              </button>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => void loadAuditLogs()}
+                  className="rounded-lg border border-[var(--color-moncasa-border)] px-3 py-2 text-xs font-semibold text-[var(--color-moncasa-text)] transition hover:bg-[var(--color-moncasa-hover)]"
+                >
+                  Recargar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleClearAuditLogs()}
+                  disabled={clearingAuditLogs || auditLogs.length === 0}
+                  className="rounded-lg bg-red-600/20 px-3 py-2 text-xs font-semibold text-red-400 transition hover:bg-red-600/30 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {clearingAuditLogs ? 'Limpiando...' : 'Limpiar auditoría'}
+                </button>
+              </div>
             </div>
 
-            {auditLogs.length > 0 ? (
-              <div className="space-y-3">
-                {auditLogs.map((log) => {
+            <div className="mb-6 grid gap-3 rounded-[1.5rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4 lg:grid-cols-[1.2fr_0.8fr_0.8fr]">
+              <input
+                value={auditSearchTerm}
+                onChange={(event) => setAuditSearchTerm(event.target.value)}
+                placeholder="Buscar por acción, entidad, detalle o usuario"
+                className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none placeholder:text-[var(--color-moncasa-muted)] focus:border-[#FE9A01]/50"
+              />
+              <label className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                Desde
+                <input
+                  type="date"
+                  value={auditDateFilter.from}
+                  onChange={(event) => setAuditDateFilter((current) => ({ ...current, from: event.target.value }))}
+                  className="mt-2 w-full rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]/50"
+                />
+              </label>
+              <label className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                Hasta
+                <input
+                  type="date"
+                  value={auditDateFilter.to}
+                  onChange={(event) => setAuditDateFilter((current) => ({ ...current, to: event.target.value }))}
+                  className="mt-2 w-full rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]/50"
+                />
+              </label>
+            </div>
+
+            {groupedAuditLogs.length > 0 ? (
+              <div className="space-y-6">
+                {groupedAuditLogs.map(([dateLabel, logsByDate]) => (
+                  <div key={dateLabel} className="space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className="text-sm font-bold uppercase tracking-[0.25em] text-[#FE9A01]">{dateLabel}</h3>
+                      <span className="text-xs text-[var(--color-moncasa-muted)]">{logsByDate.length} evento{logsByDate.length !== 1 ? 's' : ''}</span>
+                    </div>
+                    <div className="space-y-3">
+                      {logsByDate.map((log) => {
                   const fecha = new Date(log.created_at).toLocaleString('es-HN');
                   return (
                     <article
@@ -2104,10 +2330,13 @@ export default function AdminPage() {
                     </article>
                   );
                 })}
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
               <div className="rounded-[1.5rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] px-6 py-12 text-center">
-                <p className="text-[var(--color-moncasa-muted)]">Sin registros de auditoría o tabla no configurada.</p>
+                <p className="text-[var(--color-moncasa-muted)]">Sin registros de auditoría para este filtro.</p>
               </div>
             )}
           </section>
@@ -2228,6 +2457,12 @@ export default function AdminPage() {
               <div className="mt-5 space-y-2">
                 {filteredAdminRoles.length > 0 ? (
                   filteredAdminRoles.map((roleItem) => (
+                    (() => {
+                      const isCurrentUserRoleItem =
+                        roleItem.email.trim().toLowerCase() === normalizedCurrentUserEmail;
+                      const canEditRoleItem = canManageRoles && !isCurrentUserRoleItem;
+
+                      return (
                     <div
                       key={roleItem.id}
                       className="space-y-3 rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-3"
@@ -2248,43 +2483,53 @@ export default function AdminPage() {
                           </span>
                         </div>
                       </div>
-                      <div className="grid gap-2 sm:grid-cols-[1.2fr_auto_auto]">
-                        <label className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
-                          Rango
-                          <select
-                            value={normalizeAdminRole(roleItem.role)}
-                            onChange={(event) => void handleUpdateAdminRole(roleItem, normalizeAdminRole(event.target.value))}
+                      {canEditRoleItem ? (
+                        <div className="grid gap-2 sm:grid-cols-[1.2fr_auto_auto]">
+                          <label className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-moncasa-muted)]">
+                            Rango
+                            <select
+                              value={normalizeAdminRole(roleItem.role)}
+                              onChange={(event) => void handleUpdateAdminRole(roleItem, normalizeAdminRole(event.target.value))}
+                              disabled={!canManageRoles || roleActionId === roleItem.id}
+                              className="mt-2 w-full rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]/50 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              <option value="owner">Owner</option>
+                              <option value="admin">Admin</option>
+                              <option value="editor">Editor</option>
+                              <option value="viewer">Viewer</option>
+                            </select>
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => void handleToggleRoleActive(roleItem)}
                             disabled={!canManageRoles || roleActionId === roleItem.id}
-                            className="mt-2 w-full rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]/50 disabled:cursor-not-allowed disabled:opacity-60"
+                            className={`rounded-lg px-3 py-1 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                              roleItem.activo
+                                ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+                                : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                            }`}
                           >
-                            <option value="owner">Owner</option>
-                            <option value="admin">Admin</option>
-                            <option value="editor">Editor</option>
-                            <option value="viewer">Viewer</option>
-                          </select>
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => void handleToggleRoleActive(roleItem)}
-                          disabled={!canManageRoles || roleActionId === roleItem.id}
-                          className={`rounded-lg px-3 py-1 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                            roleItem.activo
-                              ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
-                              : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-                          }`}
-                        >
-                          {roleActionId === roleItem.id ? 'Guardando...' : roleItem.activo ? 'Desactivar' : 'Activar'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void handleRemoveAdminRole(roleItem)}
-                          disabled={!canManageRoles || roleActionId === roleItem.id}
-                          className="rounded-lg bg-red-600/20 px-3 py-1 text-xs font-semibold text-red-400 transition hover:bg-red-600/30 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          Quitar acceso
-                        </button>
-                      </div>
+                            {roleActionId === roleItem.id ? 'Guardando...' : roleItem.activo ? 'Desactivar' : 'Activar'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void handleRemoveAdminRole(roleItem)}
+                            disabled={!canManageRoles || roleActionId === roleItem.id}
+                            className="rounded-lg bg-red-600/20 px-3 py-1 text-xs font-semibold text-red-400 transition hover:bg-red-600/30 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            Quitar acceso
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="rounded-xl border border-dashed border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-xs text-[var(--color-moncasa-muted)]">
+                          {isCurrentUserRoleItem
+                            ? 'Este es tu propio acceso. Las acciones sensibles se ocultan para evitar cambios accidentales.'
+                            : 'Solo el propietario puede modificar este acceso.'}
+                        </div>
+                      )}
                     </div>
+                      );
+                    })()
                   ))
                 ) : (
                   <p className="text-sm text-[var(--color-moncasa-muted)]">
