@@ -2,6 +2,7 @@ import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import BrandLogo from '@/components/brand-logo';
 import AuthControls from '@/components/auth-controls';
+import MobileNavMenu from '@/components/mobile-nav-menu';
 import Footer from '@/components/footer';
 
 export const dynamic = 'force-dynamic';
@@ -230,13 +231,8 @@ export default async function Home() {
               </nav>
             </div>
 
-            <div className="flex w-full items-center justify-between gap-4 md:w-auto lg:gap-4">
-              <nav aria-label="Principal" className="flex md:hidden flex-wrap items-center gap-1 text-xs font-semibold">
-                <Link href="/" className="rounded-full bg-[#FE9A01] px-3 py-1.5 text-[#0A1116]">INICIO</Link>
-                <Link href="/productos" className="rounded-full px-3 py-1.5 text-[var(--color-moncasa-text-weak)] transition hover:bg-[var(--color-moncasa-hover)]">PROD</Link>
-                <Link href="/nosotros" className="rounded-full px-3 py-1.5 text-[var(--color-moncasa-text-weak)] transition hover:bg-[var(--color-moncasa-hover)]">NOS</Link>
-                <Link href="/contacto" className="rounded-full px-3 py-1.5 text-[var(--color-moncasa-text-weak)] transition hover:bg-[var(--color-moncasa-hover)]">CONT</Link>
-              </nav>
+            <div className="flex w-full items-center justify-end gap-4 md:w-auto lg:gap-4">
+              <MobileNavMenu />
               <AuthControls />
             </div>
           </div>
