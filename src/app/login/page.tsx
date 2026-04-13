@@ -33,7 +33,12 @@ export default function LoginPage() {
 
           <div className="rounded-[1.75rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4 sm:p-6">
             {clerkReady ? (
-              <SignIn routing="path" path="/login" appearance={{ elements: { cardBox: 'shadow-none border-0' } }} />
+              <SignIn
+                routing="path"
+                path="/login"
+                withSignUp={false}
+                appearance={{ elements: { cardBox: 'shadow-none border-0' } }}
+              />
             ) : (
               <div className="rounded-2xl border border-amber-400/30 bg-amber-400/10 p-5 text-sm text-[var(--color-moncasa-text)]">
                 Clerk no está configurado en este entorno. Revisa NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY y CLERK_SECRET_KEY en Vercel.
