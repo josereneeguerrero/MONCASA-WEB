@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireAdminAccess } from '@/lib/admin-api';
 
 export async function DELETE(request: Request) {
-  const access = await requireAdminAccess();
+  const access = await requireAdminAccess(request);
 
   if ('error' in access) {
     return NextResponse.json({ error: access.error }, { status: access.status });

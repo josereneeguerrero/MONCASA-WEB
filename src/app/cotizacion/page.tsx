@@ -1,11 +1,73 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/lib/cart-context';
 import BrandLogo from '@/components/brand-logo';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 
 export default function QuotationPage() {
-  const { items, removeItem, updateQuantity, clearCart, total } = useCart();
+  const { items, replaceItems, removeItem, updateQuantity, clearCart, total } = useCart();
+
+  useEffect(() => {
+    const syncCartPrices = async () => {
+      if (!isSupabaseConfigured || !supabase || items.length === 0) {
+        return;
+      }
+
+      const productsTable = process.env.NEXT_PUBLIC_SUPABASE_PRODUCTS_TABLE ?? 'productos';
+      const ids = items.map((item) => item.id);
+
+      const { data } = await supabase
+        .from(productsTable)
+        .select('id,nombre,categoria,precio,activo')
+        .in('id', ids as never[]);
+
+      if (!Array.isArray(data) || data.length === 0) {
+        return;
+      }
+
+      const currentById = new Map(
+        data
+          .filter((row) => String(row.activo ?? true).toLowerCase() !== 'false')
+          .map((row) => [String(row.id), row]),
+      );
+
+      const nextItems = items
+        .map((item) => {
+          const latest = currentById.get(String(item.id));
+          if (!latest) {
+            return item;
+          }
+
+          return {
+            ...item,
+            nombre: String(latest.nombre ?? item.nombre),
+            categoria: String(latest.categoria ?? item.categoria),
+            precio: String(latest.precio ?? item.precio),
+          };
+        })
+        .filter((item) => currentById.has(String(item.id)));
+
+      const changed =
+        nextItems.length !== items.length ||
+        nextItems.some((item, index) => {
+          const original = items[index];
+          return (
+            !original ||
+            original.nombre !== item.nombre ||
+            original.categoria !== item.categoria ||
+            original.precio !== item.precio
+          );
+        });
+
+      if (changed) {
+        replaceItems(nextItems);
+      }
+    };
+
+    void syncCartPrices();
+  }, [items, replaceItems]);
 
   const whatsappMessage = encodeURIComponent(
     `Hola, me gustaría una cotización para:\n\n${items

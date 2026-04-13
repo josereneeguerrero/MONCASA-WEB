@@ -4,7 +4,6 @@ import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } fro
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useClerk, useUser } from '@clerk/nextjs';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import BrandLogo from '@/components/brand-logo';
 import ConfigPanel from '@/components/config-panel';
@@ -117,8 +116,6 @@ const emptyForm: FormState = {
 
 export default function AdminPage() {
   const router = useRouter();
-  const { isLoaded, isSignedIn, user } = useUser();
-  const { signOut } = useClerk();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
@@ -638,6 +635,19 @@ export default function AdminPage() {
     setAuditDateFilter({ from: '', to: '' });
   }, []);
 
+  const getAdminRequestHeaders = useCallback(async () => {
+    const { data } = await supabase.auth.getSession();
+    const accessToken = data.session?.access_token;
+
+    if (!accessToken) {
+      return null;
+    }
+
+    return {
+      Authorization: `Bearer ${accessToken}`,
+    };
+  }, []);
+
   const loadAdminRoles = useCallback(async () => {
     if (!isSupabaseConfigured || !supabase) {
       setAdminRoles([]);
@@ -719,16 +729,14 @@ export default function AdminPage() {
   // EFECTOS
   useEffect(() => {
     const load = async () => {
-      if (!isLoaded) {
-        return;
-      }
+      const { data } = await supabase.auth.getSession();
 
-      if (!isSignedIn || !user) {
+      if (!data.session) {
         router.replace('/login');
         return;
       }
 
-      setCurrentUserEmail(user.primaryEmailAddress?.emailAddress ?? user.emailAddresses[0]?.emailAddress ?? '');
+      setCurrentUserEmail(data.session.user.email ?? '');
 
       await loadProducts();
       await loadMensajes();
@@ -739,7 +747,7 @@ export default function AdminPage() {
     };
 
     void load();
-  }, [isLoaded, isSignedIn, user, router, loadProducts, loadMensajes, loadAuditLogs, loadAdminRoles, loadBackups]);
+  }, [router, loadProducts, loadMensajes, loadAuditLogs, loadAdminRoles, loadBackups]);
 
   // HANDLERS
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -1202,8 +1210,21 @@ export default function AdminPage() {
 
     setInvitingEmail(email);
 
+    const headers = await getAdminRequestHeaders();
+
+    if (!headers) {
+      setMessage('Debes iniciar sesión de nuevo para enviar invitaciones.');
+      setInvitingEmail(null);
+      clearMessage();
+      return;
+    }
+
     const response = await fetch('/api/admin/invite', {
       method: 'POST',
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ email }),
     });
 
@@ -1327,8 +1348,21 @@ export default function AdminPage() {
 
     setClearingMessages(true);
 
+    const headers = await getAdminRequestHeaders();
+
+    if (!headers) {
+      setMessage('Debes iniciar sesión de nuevo para limpiar mensajes.');
+      setClearingMessages(false);
+      clearMessage();
+      return;
+    }
+
     const response = await fetch('/api/admin/messages', {
       method: 'DELETE',
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({}),
     });
 
@@ -1356,8 +1390,21 @@ export default function AdminPage() {
 
     setClearingAuditLogs(true);
 
+    const headers = await getAdminRequestHeaders();
+
+    if (!headers) {
+      setMessage('Debes iniciar sesión de nuevo para limpiar auditoría.');
+      setClearingAuditLogs(false);
+      clearMessage();
+      return;
+    }
+
     const response = await fetch('/api/admin/audit', {
       method: 'DELETE',
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({}),
     });
 
@@ -1384,8 +1431,21 @@ export default function AdminPage() {
 
     setDeletingMessageId(messageItem.id);
 
+    const headers = await getAdminRequestHeaders();
+
+    if (!headers) {
+      setMessage('Debes iniciar sesión de nuevo para borrar mensajes.');
+      setDeletingMessageId(null);
+      clearMessage();
+      return;
+    }
+
     const response = await fetch('/api/admin/messages', {
       method: 'DELETE',
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ id: messageItem.id }),
     });
 
@@ -1411,8 +1471,21 @@ export default function AdminPage() {
 
     setDeletingAuditId(logItem.id);
 
+    const headers = await getAdminRequestHeaders();
+
+    if (!headers) {
+      setMessage('Debes iniciar sesión de nuevo para borrar auditoría.');
+      setDeletingAuditId(null);
+      clearMessage();
+      return;
+    }
+
     const response = await fetch('/api/admin/audit', {
       method: 'DELETE',
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ id: logItem.id }),
     });
 
@@ -1548,7 +1621,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={async () => {
-                  await signOut();
+                  await supabase.auth.signOut();
                   router.replace('/login');
                 }}
                 className="rounded-full bg-[#FE9A01] px-4 py-2 font-bold text-[#0A1116] transition hover:brightness-95"
@@ -1620,8 +1693,8 @@ export default function AdminPage() {
 
         {/* MODAL DE EDICIÓN */}
         {editingId !== null && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-            <div className="w-full max-w-md rounded-[2rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-6">
+          <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 px-3 py-4 sm:items-center sm:px-4 sm:py-6">
+            <div className="flex w-full max-w-md max-h-[calc(100vh-2rem)] flex-col rounded-[2rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-5 sm:max-h-[90vh] sm:p-6">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-2xl font-black text-[var(--color-moncasa-text)]">Editar producto</h2>
                 <button
@@ -1633,7 +1706,7 @@ export default function AdminPage() {
                 </button>
               </div>
 
-              <form onSubmit={handleUpdate} className="space-y-3">
+              <form onSubmit={handleUpdate} className="flex-1 space-y-3 overflow-y-auto pr-1">
                 <details open className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-3">
                   <summary className="cursor-pointer list-none text-[11px] font-bold uppercase tracking-[0.25em] text-[#FE9A01]">
                     Datos básicos
@@ -1819,7 +1892,7 @@ export default function AdminPage() {
                   </div>
                 </details>
 
-                <div className="flex gap-2 pt-3">
+                <div className="sticky bottom-0 flex gap-2 border-t border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] pt-3">
                   <button
                     type="submit"
                     disabled={submitting || uploadingEditImage}

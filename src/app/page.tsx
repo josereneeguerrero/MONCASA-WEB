@@ -262,12 +262,12 @@ export default async function Home() {
               </div>
             </div>
 
-            <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-[#0A1116] p-5 shadow-[0_18px_50px_rgba(10,17,22,0.18)] moncasa-fade-in-down moncasa-float" style={{ animationDelay: '200ms' }}>
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(254,154,1,0.22),transparent_40%)]" />
+            <div className="relative overflow-hidden rounded-[2rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-5 shadow-[0_18px_50px_var(--color-moncasa-shadow)] moncasa-fade-in-down moncasa-float" style={{ animationDelay: '200ms' }}>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(254,154,1,0.18),transparent_42%)]" />
               <div className="relative space-y-4">
-                <div className="flex items-center justify-between text-white/70">
+                <div className="flex items-center justify-between text-[var(--color-moncasa-muted)]">
                   <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#FE9A01]">Promociones destacadas</p>
-                  <span className="rounded-full border border-[#FE9A01]/30 bg-[#FE9A01]/10 px-3 py-1 text-xs font-semibold text-[#FE9A01]">Actualizado desde admin</span>
+                  <span className="rounded-full border border-[#FE9A01]/35 bg-[#FE9A01]/12 px-3 py-1 text-xs font-semibold text-[#FE9A01]">Actualizado desde admin</span>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -275,20 +275,20 @@ export default async function Home() {
                     <Link
                       key={`${promo.titulo}-${idx}`}
                       href={promo.link || '/productos'}
-                      className={`rounded-[1.5rem] p-4 text-white transition ${
+                      className={`rounded-[1.5rem] p-4 transition ${
                         idx === 0
-                          ? 'border border-[#FE9A01]/30 bg-gradient-to-br from-[#FE9A01]/15 to-[#FE9A01]/5 hover:border-[#FE9A01]/60 hover:bg-[#FE9A01]/10'
-                          : 'border border-white/10 bg-white/5 hover:border-white/30 hover:bg-white/10'
+                          ? 'border border-[#FE9A01]/35 bg-gradient-to-br from-[#FE9A01]/16 to-[#FE9A01]/7 hover:border-[#FE9A01]/60 hover:from-[#FE9A01]/20 hover:to-[#FE9A01]/10'
+                          : 'border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] hover:border-[#FE9A01]/45 hover:bg-[var(--color-moncasa-hover)]'
                       }`}
                     >
-                      <p className="text-sm text-white/60 font-medium">{promo.tag}</p>
-                      <p className="mt-2 text-2xl font-black">{promo.titulo}</p>
-                      <p className="mt-1 text-sm text-white/70">{promo.descripcion}</p>
+                      <p className="text-sm font-medium text-[var(--color-moncasa-muted)]">{promo.tag}</p>
+                      <p className="mt-2 text-2xl font-black text-[var(--color-moncasa-text)]">{promo.titulo}</p>
+                      <p className="mt-1 text-sm text-[var(--color-moncasa-muted)]">{promo.descripcion}</p>
                     </Link>
                   ))}
                 </div>
 
-                <div className="rounded-[1.5rem] border border-white/10 bg-gradient-to-r from-[#FE9A01] via-[#ffb52d] to-[#ffd37a] p-4 text-[#0A1116] hover:shadow-lg transition">
+                <div className="rounded-[1.5rem] border border-[#FE9A01]/35 bg-gradient-to-r from-[#FE9A01]/20 via-[#ffb52d]/20 to-[#ffd37a]/24 p-4 text-[var(--color-moncasa-text)] transition hover:shadow-lg">
                   <p className="text-sm font-bold uppercase tracking-[0.2em]">{promoRows[0]?.badge ?? 'Promociones activas'}</p>
                   <p className="mt-2 text-sm">Edita estas promociones desde Admin → Configuración → clave `promos_home`.</p>
                 </div>

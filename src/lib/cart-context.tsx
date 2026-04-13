@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 export type CartItem = {
   id: string | number;
@@ -13,6 +13,7 @@ export type CartItem = {
 type CartContextType = {
   items: CartItem[];
   addItem: (item: Omit<CartItem, 'cantidad'>, cantidad?: number) => void;
+  replaceItems: (nextItems: CartItem[]) => void;
   removeItem: (id: string | number) => void;
   updateQuantity: (id: string | number, cantidad: number) => void;
   clearCart: () => void;
@@ -22,14 +23,14 @@ type CartContextType = {
 
 const CartContext = createContext<CartContextType | null>(null);
 
-const STORAGE_KEY = 'moncasa-cart';
+const DEFAULT_STORAGE_KEY = 'moncasa-cart:guest';
 
-function getStoredCart(): CartItem[] {
+function getStoredCart(storageKey: string): CartItem[] {
   if (typeof window === 'undefined') {
     return [];
   }
 
-  const stored = window.localStorage.getItem(STORAGE_KEY);
+  const stored = window.localStorage.getItem(storageKey);
   if (!stored) return [];
 
   try {
@@ -39,23 +40,64 @@ function getStoredCart(): CartItem[] {
   }
 }
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>(() => getStoredCart());
+export function CartProvider({
+  children,
+  storageKey = DEFAULT_STORAGE_KEY,
+}: {
+  children: React.ReactNode;
+  storageKey?: string;
+}) {
+  const [items, setItems] = useState<CartItem[]>(() => getStoredCart(storageKey));
+  const previousStorageKeyRef = useRef(storageKey);
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+    if (previousStorageKeyRef.current === storageKey) {
+      return;
+    }
+
+    const nextStoredCart = getStoredCart(storageKey);
+
+    if (!nextStoredCart.length) {
+      const previousStoredCart = getStoredCart(previousStorageKeyRef.current);
+
+      if (previousStoredCart.length) {
+        setItems(previousStoredCart);
+        window.localStorage.setItem(storageKey, JSON.stringify(previousStoredCart));
+        previousStorageKeyRef.current = storageKey;
+        return;
+      }
+    }
+
+    setItems(nextStoredCart);
+    previousStorageKeyRef.current = storageKey;
+  }, [storageKey]);
+
+  useEffect(() => {
+    window.localStorage.setItem(storageKey, JSON.stringify(items));
+  }, [items, storageKey]);
 
   const addItem = useCallback((item: Omit<CartItem, 'cantidad'>, cantidad = 1) => {
     setItems((current) => {
       const existing = current.find((i) => i.id === item.id);
       if (existing) {
         return current.map((i) =>
-          i.id === item.id ? { ...i, cantidad: i.cantidad + cantidad } : i,
+          i.id === item.id
+            ? {
+                ...i,
+                nombre: item.nombre,
+                categoria: item.categoria,
+                precio: item.precio,
+                cantidad: i.cantidad + cantidad,
+              }
+            : i,
         );
       }
       return [...current, { ...item, cantidad }];
     });
+  }, []);
+
+  const replaceItems = useCallback((nextItems: CartItem[]) => {
+    setItems(nextItems);
   }, []);
 
   const removeItem = useCallback((id: string | number) => {
@@ -84,7 +126,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const itemCount = useMemo(() => items.reduce((sum, item) => sum + item.cantidad, 0), [items]);
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, total, itemCount }}>
+    <CartContext.Provider value={{ items, addItem, replaceItems, removeItem, updateQuantity, clearCart, total, itemCount }}>
       {children}
     </CartContext.Provider>
   );

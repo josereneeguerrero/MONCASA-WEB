@@ -4,10 +4,12 @@ import { Suspense } from "react";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import ThemeScript from "@/components/theme-script";
+import GoogleAnalytics from "@/components/google-analytics";
+import AppShellWithClerk from "@/components/app-shell-with-clerk";
 import ThemeToggle from "@/components/theme-toggle";
 import FloatingCartVisibility from "@/components/floating-cart-visibility";
 import WhatsAppFloat from "@/components/whatsapp-float";
-import GoogleAnalytics from "@/components/google-analytics";
+import NewsletterModal from "@/components/newsletter-modal";
 import { CartProvider } from "@/lib/cart-context";
 
 const geistSans = Geist({
@@ -67,12 +69,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-[var(--color-moncasa-page-bg)] text-[var(--color-moncasa-text)]">
         {clerkReady ? (
           <ClerkProvider publishableKey={clerkPublishableKey}>
-            <CartProvider>
-              {children}
-              <FloatingCartVisibility />
-              <WhatsAppFloat />
-            </CartProvider>
-            <ThemeToggle />
+            <AppShellWithClerk>{children}</AppShellWithClerk>
           </ClerkProvider>
         ) : (
           <>
@@ -84,6 +81,7 @@ export default function RootLayout({
             <ThemeToggle />
           </>
         )}
+        <NewsletterModal />
         <Suspense fallback={null}>
           <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
         </Suspense>

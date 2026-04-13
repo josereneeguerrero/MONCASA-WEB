@@ -1,13 +1,78 @@
 "use client";
 
+import { FormEvent, useState } from 'react';
 import Link from 'next/link';
 import { useConfig } from '@/lib/useConfig';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 
 export default function Footer() {
   const { get } = useConfig();
   const telefono = get('telefono', '+504 3218-4060');
   const telefonoHref = `tel:${telefono.replace(/[^\d+]/g, '')}`;
   const ubicacion = get('ubicacion', 'San Lorenzo, Valle 02501, Honduras');
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState('');
+  const [savingNewsletter, setSavingNewsletter] = useState(false);
+
+  const handleNewsletterSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setNewsletterStatus('');
+
+    const normalizedEmail = newsletterEmail.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(normalizedEmail)) {
+      setNewsletterStatus('Ingresa un correo valido para suscribirte.');
+      return;
+    }
+
+    if (!isSupabaseConfigured || !supabase) {
+      setNewsletterStatus('No se pudo conectar para guardar el correo.');
+      return;
+    }
+
+    setSavingNewsletter(true);
+
+    try {
+      const contactosTable = process.env.NEXT_PUBLIC_SUPABASE_CONTACTS_TABLE ?? 'contactos';
+      const { data: existingRows, error: findError } = await supabase
+        .from(contactosTable)
+        .select('email')
+        .eq('email', normalizedEmail)
+        .eq('asunto', 'Newsletter')
+        .limit(1);
+
+      if (findError) {
+        throw findError;
+      }
+
+      if (existingRows && existingRows.length > 0) {
+        setNewsletterStatus('Este correo ya esta suscrito.');
+        return;
+      }
+
+      const { error } = await supabase.from(contactosTable).insert({
+        nombre: 'Suscriptor Newsletter',
+        email: normalizedEmail,
+        telefono: null,
+        asunto: 'Newsletter',
+        mensaje: 'Suscripcion a noticias desde el footer',
+        created_at: new Date().toISOString(),
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      setNewsletterEmail('');
+      setNewsletterStatus('Suscripcion completada. Te avisaremos de novedades.');
+    } catch (error) {
+      console.error('Error al guardar suscripcion newsletter:', error);
+      setNewsletterStatus('No se pudo guardar tu correo. Intenta de nuevo.');
+    } finally {
+      setSavingNewsletter(false);
+    }
+  };
 
   return (
     <footer className="border-t border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-inverse-surface)] px-6 py-12 text-[var(--color-moncasa-inverse-text)] sm:px-8">
@@ -97,18 +162,43 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Llamada a la acción */}
-          <div className="rounded-xl border border-[#FE9A01]/30 bg-[#FE9A01]/10 p-6">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#FE9A01]">Solicita una cotización</p>
-            <p className="mt-3 text-sm text-[var(--color-moncasa-inverse-muted)]">
-              Contáctanos para conocer precios especiales y disponibilidad de productos
-            </p>
-            <Link 
-              href="/contacto" 
-              className="mt-4 inline-block rounded-lg bg-[#FE9A01] px-4 py-2 text-sm font-bold text-[#0A1116] transition hover:brightness-95"
-            >
-              Contactanos ahora
-            </Link>
+          {/* Llamada a la acción + newsletter */}
+          <div className="space-y-4 rounded-xl border border-[#FE9A01]/30 bg-[#FE9A01]/10 p-6">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#FE9A01]">Solicita una cotización</p>
+              <p className="mt-3 text-sm text-[var(--color-moncasa-inverse-muted)]">
+                Contáctanos para conocer precios especiales y disponibilidad de productos
+              </p>
+              <Link
+                href="/contacto"
+                className="mt-4 inline-block rounded-lg bg-[#FE9A01] px-4 py-2 text-sm font-bold text-[#0A1116] transition hover:brightness-95"
+              >
+                Contactanos ahora
+              </Link>
+            </div>
+
+            <div className="border-t border-[#FE9A01]/25 pt-4">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#FE9A01]">Recibe noticias y ofertas</p>
+              <form onSubmit={handleNewsletterSubmit} className="mt-3 flex flex-col gap-2">
+                <input
+                  type="email"
+                  value={newsletterEmail}
+                  onChange={(event) => setNewsletterEmail(event.target.value)}
+                  placeholder="tu@email.com"
+                  className="w-full rounded-lg border border-white/20 bg-[#0A1116]/40 px-3 py-2 text-sm text-white outline-none placeholder:text-white/50 focus:border-[#FE9A01]"
+                />
+                <button
+                  type="submit"
+                  disabled={savingNewsletter}
+                  className="rounded-lg border border-[#FE9A01]/60 bg-[#FE9A01]/20 px-3 py-2 text-sm font-semibold text-[#FE9A01] transition hover:bg-[#FE9A01]/30 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {savingNewsletter ? 'Guardando...' : 'Suscribirme'}
+                </button>
+              </form>
+              {newsletterStatus ? (
+                <p className="mt-2 text-xs text-[var(--color-moncasa-inverse-muted)]">{newsletterStatus}</p>
+              ) : null}
+            </div>
           </div>
         </div>
 

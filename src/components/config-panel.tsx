@@ -133,6 +133,19 @@ export default function ConfigPanel({ currentUserEmail }: ConfigPanelProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [activeSection, setActiveSection] = useState<ConfigSectionKey>('all');
+  const [savingAll, setSavingAll] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+
+  const quickKeys = [
+    'hero_titulo',
+    'hero_subtitulo',
+    'telefono',
+    'whatsapp',
+    'direccion_completa',
+    'banner_activo',
+    'banner_texto',
+    'maps_link_url',
+  ];
 
   const loadConfigs = useCallback(async () => {
     setLoading(true);
@@ -172,6 +185,35 @@ export default function ConfigPanel({ currentUserEmail }: ConfigPanelProps) {
     },
     [editingValues, currentUserEmail]
   );
+
+  const handleSaveAll = useCallback(async () => {
+    const changed = configs.filter((item) => editingValues[item.clave] !== item.valor);
+
+    if (!changed.length) {
+      return;
+    }
+
+    setSavingAll(true);
+
+    for (const item of changed) {
+      await updateConfigValue(item.clave, editingValues[item.clave], currentUserEmail);
+    }
+
+    setConfigs((prev) =>
+      prev.map((item) =>
+        changed.some((changedItem) => changedItem.clave === item.clave)
+          ? {
+              ...item,
+              valor: editingValues[item.clave],
+              updated_at: new Date().toISOString(),
+              updated_by: currentUserEmail,
+            }
+          : item,
+      ),
+    );
+
+    setSavingAll(false);
+  }, [configs, currentUserEmail, editingValues]);
 
   const handleChange = useCallback((clave: string, newValue: string) => {
     setEditingValues((prev) => ({
@@ -216,6 +258,9 @@ export default function ConfigPanel({ currentUserEmail }: ConfigPanelProps) {
   }, {} as Record<Exclude<ConfigSectionKey, 'all'>, number>);
 
   const changedCount = configs.filter((item) => editingValues[item.clave] !== item.valor).length;
+  const quickItems = quickKeys
+    .map((key) => configs.find((item) => item.clave === key))
+    .filter((item): item is ConfigItem => Boolean(item));
 
   if (loading) {
     return (
@@ -290,7 +335,79 @@ export default function ConfigPanel({ currentUserEmail }: ConfigPanelProps) {
         </div>
       </div>
 
-      {Object.entries(groupedBySection).map(([sectionKey, items]) => (
+      <div className="rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4 sm:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className="text-lg font-black text-[var(--color-moncasa-text)]">Editor rápido</h3>
+            <p className="text-sm text-[var(--color-moncasa-muted)]">
+              Campos clave para editar el sitio sin entrar en configuraciones avanzadas.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => void handleSaveAll()}
+            disabled={savingAll || changedCount === 0}
+            className="rounded-full bg-[#FE9A01] px-4 py-2 text-sm font-bold text-[#0A1116] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {savingAll ? 'Guardando todo...' : 'Guardar todos los cambios'}
+          </button>
+        </div>
+
+        <div className="mt-4 grid gap-3 lg:grid-cols-2">
+          {quickItems.map((item) => (
+            <div key={item.clave} className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] p-4">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-[var(--color-moncasa-text)]">
+                  {FRIENDLY_LABELS[item.clave] ?? item.clave}
+                </p>
+                {editingValues[item.clave] !== item.valor ? (
+                  <span className="rounded-full bg-amber-500/20 px-2 py-1 text-[10px] font-semibold text-amber-400">Pendiente</span>
+                ) : null}
+              </div>
+
+              {item.clave === 'banner_activo' ? (
+                <select
+                  value={editingValues[item.clave] ?? ''}
+                  onChange={(e) => handleChange(item.clave, e.target.value)}
+                  className="w-full rounded-lg border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]"
+                >
+                  <option value="false">Desactivado</option>
+                  <option value="true">Activado</option>
+                </select>
+              ) : item.tipo === 'url' ? (
+                <input
+                  type="url"
+                  value={editingValues[item.clave] ?? ''}
+                  onChange={(e) => handleChange(item.clave, e.target.value)}
+                  className="w-full rounded-lg border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]"
+                />
+              ) : (
+                <textarea
+                  value={editingValues[item.clave] ?? ''}
+                  onChange={(e) => handleChange(item.clave, e.target.value)}
+                  rows={item.clave === 'direccion_completa' ? 3 : 2}
+                  className="w-full rounded-lg border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]"
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-black text-[var(--color-moncasa-text)]">Editor avanzado</h3>
+        <button
+          type="button"
+          onClick={() => setAdvancedOpen((prev) => !prev)}
+          className="rounded-full border border-[var(--color-moncasa-border)] px-3 py-1 text-xs font-semibold text-[var(--color-moncasa-text)] transition hover:bg-[var(--color-moncasa-hover)]"
+        >
+          {advancedOpen ? 'Ocultar' : 'Mostrar'}
+        </button>
+      </div>
+
+      {advancedOpen ? (
+        <>
+          {Object.entries(groupedBySection).map(([sectionKey, items]) => (
         <div key={sectionKey} className="space-y-4">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -423,17 +540,19 @@ export default function ConfigPanel({ currentUserEmail }: ConfigPanelProps) {
             ))}
           </div>
         </div>
-      ))}
+          ))}
 
-      {filteredConfigs.length === 0 && (
-        <div className="rounded-lg border border-dashed border-[var(--color-moncasa-border)] py-8 text-center">
-          <p className="text-[var(--color-moncasa-muted)]">
-            {searchTerm || filterType !== 'all' 
-              ? 'No hay configuraciones que coincidan'
-              : 'No hay configuraciones disponibles'}
-          </p>
-        </div>
-      )}
+          {filteredConfigs.length === 0 && (
+            <div className="rounded-lg border border-dashed border-[var(--color-moncasa-border)] py-8 text-center">
+              <p className="text-[var(--color-moncasa-muted)]">
+                {searchTerm || filterType !== 'all'
+                  ? 'No hay configuraciones que coincidan'
+                  : 'No hay configuraciones disponibles'}
+              </p>
+            </div>
+          )}
+        </>
+      ) : null}
     </div>
   );
 }

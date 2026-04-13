@@ -1,10 +1,70 @@
 'use client';
 
-import { SignIn } from '@clerk/nextjs';
+import { FormEvent, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import BrandLogo from '@/components/brand-logo';
+import { supabase } from '@/lib/supabase';
 
 export default function LoginPage() {
-  const clerkReady = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('Inicia sesión para acceder al panel.');
+  const [loading, setLoading] = useState(false);
+  const [sendingReset, setSendingReset] = useState(false);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) router.replace('/admin');
+    };
+
+    void checkSession();
+  }, [router]);
+
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage('Verificando credenciales...');
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      setMessage('Error al iniciar sesión.');
+      return;
+    }
+
+    router.replace('/admin');
+  };
+
+  const onSendReset = async () => {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail) {
+      setMessage('Ingresa tu correo para enviar el enlace de recuperación.');
+      return;
+    }
+
+    setSendingReset(true);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+      redirectTo: `${window.location.origin}/login`,
+    });
+
+    if (error) {
+      setMessage(`No se pudo enviar el correo: ${error.message}`);
+      setSendingReset(false);
+      return;
+    }
+
+    setMessage('Revisa tu correo para definir o restablecer la contraseña.');
+    setSendingReset(false);
+  };
 
   return (
     <main className="min-h-screen bg-[var(--color-moncasa-page-bg)] px-4 py-4 text-[var(--color-moncasa-text)] sm:px-6 lg:px-8">
@@ -27,23 +87,42 @@ export default function LoginPage() {
             </div>
 
             <div className="rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4 text-sm text-[var(--color-moncasa-muted)]">
-              Si eres propietario o administrador, usa tu correo invitado. Si no recuerdas la contraseña, Clerk te permite recuperarla desde el mismo flujo de acceso.
+              {message}
             </div>
           </div>
 
           <div className="rounded-[1.75rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4 sm:p-6">
-            {clerkReady ? (
-              <SignIn
-                routing="path"
-                path="/login"
-                withSignUp={false}
-                appearance={{ elements: { cardBox: 'shadow-none border-0' } }}
+            <form className="space-y-4" onSubmit={onSubmit}>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Correo"
+                className="w-full rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] px-4 py-3 outline-none placeholder:text-[var(--color-moncasa-muted-strong)] focus:border-[#FE9A01]"
               />
-            ) : (
-              <div className="rounded-2xl border border-amber-400/30 bg-amber-400/10 p-5 text-sm text-[var(--color-moncasa-text)]">
-                Clerk no está configurado en este entorno. Revisa NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY y CLERK_SECRET_KEY en Vercel.
-              </div>
-            )}
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Contraseña"
+                className="w-full rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] px-4 py-3 outline-none placeholder:text-[var(--color-moncasa-muted-strong)] focus:border-[#FE9A01]"
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-xl bg-[#FE9A01] px-4 py-3 font-semibold text-[#0A1116] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loading ? 'Entrando...' : 'Entrar'}
+              </button>
+              <button
+                type="button"
+                onClick={() => void onSendReset()}
+                disabled={sendingReset}
+                className="w-full rounded-xl border border-[var(--color-moncasa-border)] px-4 py-3 text-sm font-semibold text-[var(--color-moncasa-text)] transition hover:bg-[var(--color-moncasa-surface-soft)] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {sendingReset ? 'Enviando enlace...' : 'Definir o recuperar contraseña'}
+              </button>
+            </form>
           </div>
         </div>
       </section>
