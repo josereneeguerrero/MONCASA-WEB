@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+:root {
+  --color-moncasa-orange: #fe9a01;
+  --color-moncasa-gold: #ffb52d;
+  --color-moncasa-dark: #0a1116;
+  --color-moncasa-page-bg: #f5f7fa;
+  --color-moncasa-surface: #ffffff;
+  --color-moncasa-surface-soft: #f1f5f9;
+  --color-moncasa-border: #d8e0ea;
+  --color-moncasa-text: #0a1116;
+  --color-moncasa-text-weak: #334155;
+  --color-moncasa-muted: #5b6677;
+  --color-moncasa-muted-strong: #6b7280;
+  --color-moncasa-hover: #e8eef5;
+  --color-moncasa-shadow: rgba(10, 17, 22, 0.08);
+  --color-moncasa-inverse-surface: #0a1116;
+  --color-moncasa-inverse-surface-soft: #111a21;
+  --color-moncasa-inverse-text: #f5f7fa;
+  --color-moncasa-inverse-muted: rgba(255, 255, 255, 0.72);
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --color-moncasa-page-bg: #0a1116;
+  --color-moncasa-surface: #111a21;
+  --color-moncasa-surface-soft: #18222b;
+  --color-moncasa-border: rgba(255, 255, 255, 0.12);
+  --color-moncasa-text: #f5f7fa;
+  --color-moncasa-text-weak: #e5e7eb;
+  --color-moncasa-muted: rgba(255, 255, 255, 0.72);
+  --color-moncasa-muted-strong: rgba(255, 255, 255, 0.56);
+  --color-moncasa-hover: rgba(255, 255, 255, 0.08);
+  --color-moncasa-shadow: rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme='light'] {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(254, 154, 1, 0.08), transparent 32%),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-moncasa-page-bg) 92%, white 8%) 0%, var(--color-moncasa-page-bg) 100%);
+  color: var(--color-moncasa-text);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: rgba(254, 154, 1, 0.25);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
