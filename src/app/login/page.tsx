@@ -1,19 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
-import { SignIn, useUser } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
+import { SignIn } from '@clerk/nextjs';
 import BrandLogo from '@/components/brand-logo';
 
 export default function LoginPage() {
-  const router = useRouter();
-  const { isLoaded, isSignedIn } = useUser();
-
-  useEffect(() => {
-    if (isLoaded && isSignedIn) {
-      router.replace('/admin');
-    }
-  }, [isLoaded, isSignedIn, router]);
+  const clerkReady = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
   return (
     <main className="min-h-screen bg-[var(--color-moncasa-page-bg)] px-4 py-4 text-[var(--color-moncasa-text)] sm:px-6 lg:px-8">
@@ -41,7 +32,13 @@ export default function LoginPage() {
           </div>
 
           <div className="rounded-[1.75rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4 sm:p-6">
-            <SignIn routing="path" path="/login" appearance={{ elements: { cardBox: 'shadow-none border-0' } }} />
+            {clerkReady ? (
+              <SignIn routing="path" path="/login" appearance={{ elements: { cardBox: 'shadow-none border-0' } }} />
+            ) : (
+              <div className="rounded-2xl border border-amber-400/30 bg-amber-400/10 p-5 text-sm text-[var(--color-moncasa-text)]">
+                Clerk no está configurado en este entorno. Revisa NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY y CLERK_SECRET_KEY en Vercel.
+              </div>
+            )}
           </div>
         </div>
       </section>
