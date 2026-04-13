@@ -7,6 +7,124 @@ interface ConfigPanelProps {
   currentUserEmail: string;
 }
 
+type ConfigSectionKey =
+  | 'all'
+  | 'general'
+  | 'contacto'
+  | 'mapa'
+  | 'horarios'
+  | 'redes'
+  | 'banner'
+  | 'promociones'
+  | 'seo'
+  | 'sistema';
+
+const SECTION_META: Record<Exclude<ConfigSectionKey, 'all'>, { title: string; hint: string }> = {
+  general: {
+    title: 'General',
+    hint: 'Textos base de portada e identidad de la empresa.',
+  },
+  contacto: {
+    title: 'Contacto',
+    hint: 'Datos para llamadas, WhatsApp y dirección comercial.',
+  },
+  mapa: {
+    title: 'Mapa y Ubicación',
+    hint: 'URL embebida de Google Maps y enlace público del mapa.',
+  },
+  horarios: {
+    title: 'Horarios',
+    hint: 'Horarios de atención que se muestran al cliente.',
+  },
+  redes: {
+    title: 'Redes Sociales',
+    hint: 'Enlaces públicos de Facebook, YouTube e Instagram.',
+  },
+  banner: {
+    title: 'Banner',
+    hint: 'Avisos destacados para promociones o comunicados.',
+  },
+  promociones: {
+    title: 'Promociones',
+    hint: 'Bloques promocionales de la home en formato JSON.',
+  },
+  seo: {
+    title: 'SEO',
+    hint: 'Metadatos para buscadores y redes sociales.',
+  },
+  sistema: {
+    title: 'Sistema',
+    hint: 'Campos avanzados o sin categoría definida.',
+  },
+};
+
+const FRIENDLY_LABELS: Record<string, string> = {
+  hero_titulo: 'Título principal (Home)',
+  hero_subtitulo: 'Subtítulo (Home)',
+  hero_cta_text: 'Texto botón principal (Home)',
+  hero_cta_link: 'Enlace botón principal (Home)',
+  telefono: 'Teléfono principal',
+  whatsapp: 'WhatsApp',
+  email_contacto: 'Correo de contacto',
+  ubicacion: 'Ubicación corta',
+  direccion_completa: 'Dirección completa',
+  maps_embed_url: 'URL iframe del mapa',
+  maps_link_url: 'URL pública del mapa',
+  horario_lunes_viernes: 'Horario lunes a viernes',
+  horario_sabado: 'Horario sábado',
+  horario_domingo: 'Horario domingo',
+  facebook: 'Facebook',
+  youtube: 'YouTube',
+  instagram: 'Instagram',
+  nombre_empresa: 'Nombre de empresa',
+  slogan: 'Slogan',
+  descripcion_corta: 'Descripción corta',
+  banner_activo: 'Banner activo',
+  banner_texto: 'Texto del banner',
+  banner_tipo: 'Tipo de banner',
+  banner_link: 'Enlace del banner',
+  promos_home: 'Promociones en home (JSON)',
+  meta_title_home: 'Meta title Home',
+  meta_description_home: 'Meta description Home',
+  meta_keywords_home: 'Meta keywords Home',
+};
+
+function getSectionFromKey(key: string): Exclude<ConfigSectionKey, 'all'> {
+  if (key.startsWith('hero_') || ['nombre_empresa', 'slogan', 'descripcion_corta'].includes(key)) {
+    return 'general';
+  }
+
+  if (['telefono', 'whatsapp', 'email_contacto', 'ubicacion', 'direccion_completa'].includes(key)) {
+    return 'contacto';
+  }
+
+  if (key.startsWith('maps_')) {
+    return 'mapa';
+  }
+
+  if (key.startsWith('horario_')) {
+    return 'horarios';
+  }
+
+  if (['facebook', 'youtube', 'instagram'].includes(key)) {
+    return 'redes';
+  }
+
+  if (key.startsWith('banner_')) {
+    return 'banner';
+  }
+
+  if (key === 'promos_home') {
+    return 'promociones';
+  }
+
+  if (key.startsWith('meta_')) {
+    return 'seo';
+  }
+
+  return 'sistema';
+}
+
 export default function ConfigPanel({ currentUserEmail }: ConfigPanelProps) {
   const [configs, setConfigs] = useState<ConfigItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -14,6 +132,7 @@ export default function ConfigPanel({ currentUserEmail }: ConfigPanelProps) {
   const [editingValues, setEditingValues] = useState<Record<string, string>>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
+  const [activeSection, setActiveSection] = useState<ConfigSectionKey>('all');
 
   const loadConfigs = useCallback(async () => {
     setLoading(true);
@@ -61,24 +180,42 @@ export default function ConfigPanel({ currentUserEmail }: ConfigPanelProps) {
     }));
   }, []);
 
+  const resetValue = useCallback((clave: string, original: string) => {
+    setEditingValues((prev) => ({
+      ...prev,
+      [clave]: original,
+    }));
+  }, []);
+
   const filteredConfigs = configs.filter((item) => {
     const matchesSearch = item.clave.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.descripcion?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'all' || item.tipo === filterType;
-    return matchesSearch && matchesType;
+    const section = getSectionFromKey(item.clave);
+    const matchesSection = activeSection === 'all' || section === activeSection;
+    return matchesSearch && matchesType && matchesSection;
   });
 
   const types = ['all', ...new Set(configs.map((c) => c.tipo))];
-  const groupedByType = filteredConfigs.reduce(
-    (acc, item) => {
-      if (!acc[item.tipo]) {
-        acc[item.tipo] = [];
-      }
-      acc[item.tipo].push(item);
-      return acc;
-    },
-    {} as Record<string, ConfigItem[]>
-  );
+
+  const groupedBySection = filteredConfigs.reduce((acc, item) => {
+    const section = getSectionFromKey(item.clave);
+
+    if (!acc[section]) {
+      acc[section] = [];
+    }
+
+    acc[section].push(item);
+    return acc;
+  }, {} as Record<Exclude<ConfigSectionKey, 'all'>, ConfigItem[]>);
+
+  const sectionCounts = configs.reduce((acc, item) => {
+    const section = getSectionFromKey(item.clave);
+    acc[section] = (acc[section] ?? 0) + 1;
+    return acc;
+  }, {} as Record<Exclude<ConfigSectionKey, 'all'>, number>);
+
+  const changedCount = configs.filter((item) => editingValues[item.clave] !== item.valor).length;
 
   if (loading) {
     return (
@@ -90,58 +227,126 @@ export default function ConfigPanel({ currentUserEmail }: ConfigPanelProps) {
 
   return (
     <div className="space-y-6">
-      {/* Controles */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <input
-          type="text"
-          placeholder="Buscar en configuración..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="rounded-lg border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] px-4 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]"
-        />
-        
-        <select
-          value={filterType}
-          onChange={(e) => setFilterType(e.target.value)}
-          className="rounded-lg border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] px-4 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]"
-        >
-          {types.map((type) => (
-            <option key={type} value={type}>
-              {type === 'all' ? 'Todos los tipos' : type}
-            </option>
+      <div className="rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4 sm:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm font-semibold text-[var(--color-moncasa-text)]">
+            Configuración editable del sitio
+          </p>
+          <span className="rounded-full border border-[#FE9A01]/30 bg-[#FE9A01]/10 px-3 py-1 text-xs font-semibold text-[#FE9A01]">
+            {changedCount} cambios sin guardar
+          </span>
+        </div>
+
+        <div className="mt-4 grid gap-3 lg:grid-cols-[1.2fr_0.8fr_0.8fr]">
+          <input
+            type="text"
+            placeholder="Buscar por nombre o descripción..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-4 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]"
+          />
+
+          <select
+            value={activeSection}
+            onChange={(e) => setActiveSection(e.target.value as ConfigSectionKey)}
+            className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-4 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]"
+          >
+            <option value="all">Todas las secciones</option>
+            {Object.entries(SECTION_META).map(([key, section]) => (
+              <option key={key} value={key}>
+                {section.title}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-4 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]"
+          >
+            {types.map((type) => (
+              <option key={type} value={type}>
+                {type === 'all' ? 'Todos los tipos' : type}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          {Object.entries(SECTION_META).map(([key, section]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setActiveSection(key as ConfigSectionKey)}
+              className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                activeSection === key
+                  ? 'border-[#FE9A01]/60 bg-[#FE9A01]/15 text-[#FE9A01]'
+                  : 'border-[var(--color-moncasa-border)] text-[var(--color-moncasa-muted)] hover:bg-[var(--color-moncasa-hover)]'
+              }`}
+            >
+              {section.title} ({sectionCounts[key as Exclude<ConfigSectionKey, 'all'>] ?? 0})
+            </button>
           ))}
-        </select>
+        </div>
       </div>
 
-      {/* Configuraciones agrupadas por tipo */}
-      {Object.entries(groupedByType).map(([type, items]) => (
-        <div key={type} className="space-y-4">
-          <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-[#FE9A01]">
-            {type}
-          </h3>
+      {Object.entries(groupedBySection).map(([sectionKey, items]) => (
+        <div key={sectionKey} className="space-y-4">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-black text-[var(--color-moncasa-text)]">
+                {SECTION_META[sectionKey as Exclude<ConfigSectionKey, 'all'>].title}
+              </h3>
+              <p className="mt-1 text-sm text-[var(--color-moncasa-muted)]">
+                {SECTION_META[sectionKey as Exclude<ConfigSectionKey, 'all'>].hint}
+              </p>
+            </div>
+            <span className="rounded-full border border-[var(--color-moncasa-border)] px-3 py-1 text-xs font-semibold text-[var(--color-moncasa-muted)]">
+              {items.length} campo(s)
+            </span>
+          </div>
 
-          <div className="space-y-3">
+          <div className="grid gap-3 lg:grid-cols-2">
             {items.map((item) => (
-              <div
-                key={item.clave}
-                className="rounded-lg border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4"
-              >
+              <div key={item.clave} className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4">
                 <div className="flex flex-col gap-2">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-[var(--color-moncasa-text)]">
-                        {item.clave}
-                      </p>
+                      <p className="text-sm font-semibold text-[var(--color-moncasa-text)]">{FRIENDLY_LABELS[item.clave] ?? item.clave}</p>
+                      <p className="mt-0.5 text-[11px] font-mono text-[var(--color-moncasa-muted)]">{item.clave}</p>
                       {item.descripcion && (
-                        <p className="mt-1 text-xs text-[var(--color-moncasa-muted)]">
-                          {item.descripcion}
-                        </p>
+                        <p className="mt-1 text-xs text-[var(--color-moncasa-muted)]">{item.descripcion}</p>
                       )}
                     </div>
-                    <span className="text-xs font-mono text-[#FE9A01]">{item.tipo}</span>
+                    <div className="flex items-center gap-2">
+                      {editingValues[item.clave] !== item.valor ? (
+                        <span className="rounded-full bg-amber-500/20 px-2 py-1 text-[10px] font-semibold text-amber-400">Pendiente</span>
+                      ) : null}
+                      <span className="text-xs font-mono text-[#FE9A01]">{item.tipo}</span>
+                    </div>
                   </div>
 
-                  {item.tipo === 'numero' ? (
+                  {item.clave === 'banner_activo' ? (
+                    <select
+                      value={editingValues[item.clave] ?? ''}
+                      onChange={(e) => handleChange(item.clave, e.target.value)}
+                      className="rounded-lg border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]"
+                    >
+                      <option value="false">Desactivado</option>
+                      <option value="true">Activado</option>
+                    </select>
+                  ) : item.clave === 'banner_tipo' ? (
+                    <select
+                      value={editingValues[item.clave] ?? ''}
+                      onChange={(e) => handleChange(item.clave, e.target.value)}
+                      className="rounded-lg border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]"
+                    >
+                      <option value="info">Info</option>
+                      <option value="success">Success</option>
+                      <option value="warning">Warning</option>
+                      <option value="error">Error</option>
+                    </select>
+                  ) : item.tipo === 'numero' ? (
                     <input
                       type="number"
                       value={editingValues[item.clave] ?? ''}
@@ -163,6 +368,13 @@ export default function ConfigPanel({ currentUserEmail }: ConfigPanelProps) {
                       placeholder="https://..."
                       className="rounded-lg border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]"
                     />
+                  ) : item.tipo === 'json' || item.clave === 'promos_home' ? (
+                    <textarea
+                      value={editingValues[item.clave] ?? ''}
+                      onChange={(e) => handleChange(item.clave, e.target.value)}
+                      rows={8}
+                      className="rounded-lg border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-xs text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]"
+                    />
                   ) : (
                     <textarea
                       value={editingValues[item.clave] ?? ''}
@@ -171,6 +383,12 @@ export default function ConfigPanel({ currentUserEmail }: ConfigPanelProps) {
                       className="rounded-lg border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-page-bg)] px-3 py-2 text-sm text-[var(--color-moncasa-text)] outline-none focus:border-[#FE9A01]"
                     />
                   )}
+
+                  {item.clave === 'promos_home' ? (
+                    <p className="text-xs text-[var(--color-moncasa-muted)]">
+                      Tip: usa un array JSON con objetos que tengan `tag`, `titulo`, `descripcion`, `badge`, `link`.
+                    </p>
+                  ) : null}
 
                   <div className="flex items-center justify-between">
                     <div className="text-xs text-[var(--color-moncasa-muted)]">
@@ -181,13 +399,24 @@ export default function ConfigPanel({ currentUserEmail }: ConfigPanelProps) {
                         </>
                       )}
                     </div>
-                    <button
-                      onClick={() => handleSave(item.clave)}
-                      disabled={saving === item.clave || editingValues[item.clave] === item.valor}
-                      className="rounded-lg bg-[#FE9A01] px-3 py-1 text-xs font-semibold text-[#0A1116] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {saving === item.clave ? 'Guardando...' : 'Guardar'}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => resetValue(item.clave, item.valor)}
+                        disabled={editingValues[item.clave] === item.valor}
+                        className="rounded-lg border border-[var(--color-moncasa-border)] px-3 py-1 text-xs font-semibold text-[var(--color-moncasa-text)] transition hover:bg-[var(--color-moncasa-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Deshacer
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSave(item.clave)}
+                        disabled={saving === item.clave || editingValues[item.clave] === item.valor}
+                        className="rounded-lg bg-[#FE9A01] px-3 py-1 text-xs font-semibold text-[#0A1116] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {saving === item.clave ? 'Guardando...' : 'Guardar'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
