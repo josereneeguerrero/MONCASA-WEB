@@ -112,3 +112,119 @@ textarea:focus-visible {
 .moncasa-toast-enter {
   animation: moncasa-toast-enter 220ms ease-out;
 }
+
+/* Fade In Animations */
+@keyframes moncasa-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes moncasa-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes moncasa-fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes moncasa-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes moncasa-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes moncasa-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes moncasa-bounce-subtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes moncasa-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+/* Animation Classes */
+.moncasa-fade-in {
+  animation: moncasa-fade-in 600ms ease-out;
+}
+
+.moncasa-fade-in-up {
+  animation: moncasa-fade-in-up 700ms ease-out;
+}
+
+.moncasa-fade-in-down {
+  animation: moncasa-fade-in-down 700ms ease-out;
+}
+
+.moncasa-slide-in-right {
+  animation: moncasa-slide-in-right 700ms ease-out;
+}
+
+.moncasa-slide-in-left {
+  animation: moncasa-slide-in-left 700ms ease-out;
+}
+
+.moncasa-scale-in {
+  animation: moncasa-scale-in 600ms ease-out;
+}
+
+.moncasa-bounce-subtle {
+  animation: moncasa-bounce-subtle 3s ease-in-out infinite;
+}
+
+.moncasa-float {
+  animation: moncasa-float 3s ease-in-out infinite;
+}
