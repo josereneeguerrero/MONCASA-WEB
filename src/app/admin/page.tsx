@@ -1596,26 +1596,26 @@ export default function AdminPage() {
 
   // JSX
   return (
-    <main className="min-h-screen bg-[var(--color-moncasa-page-bg)] px-4 py-4 text-[var(--color-moncasa-text)] sm:px-6 lg:px-8">
-      <div className="mx-auto min-h-[calc(100vh-2rem)] max-w-7xl overflow-hidden rounded-[2rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] shadow-[0_20px_70px_var(--color-moncasa-shadow)]">
+    <main className="min-h-screen bg-[var(--color-moncasa-page-bg)] px-2 py-2 text-[var(--color-moncasa-text)] sm:px-4 sm:py-4 lg:px-6">
+      <div className="mx-auto min-h-[calc(100vh-1rem)] max-w-7xl overflow-hidden rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] shadow-[0_20px_70px_var(--color-moncasa-shadow)] sm:min-h-[calc(100vh-2rem)] sm:rounded-[2rem]">
         {/* HEADER */}
-        <header className="border-b border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] px-6 py-5 sm:px-8">
+        <header className="border-b border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <Link href="/" className="flex items-center gap-3">
+            <Link href="/" className="flex min-w-0 items-center gap-3">
               <BrandLogo className="h-12 w-12 rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] object-cover p-1 shadow-[0_8px_24px_var(--color-moncasa-shadow)]" />
-              <div className="leading-tight">
-                <p className="text-[10px] font-bold tracking-[0.35em] text-[#FE9A01]">FERRETERIA MONCASA</p>
+              <div className="min-w-0 leading-tight">
+                <p className="text-[9px] font-bold tracking-[0.2em] text-[#FE9A01] sm:text-[10px] sm:tracking-[0.35em]">FERRETERIA MONCASA</p>
                 <p className="text-sm text-[var(--color-moncasa-muted)]">Panel de control</p>
               </div>
             </Link>
 
-            <div className="flex flex-wrap gap-3 text-sm font-semibold text-[var(--color-moncasa-text-weak)]">
-              <div className="rounded-full border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] px-4 py-2 text-xs text-[var(--color-moncasa-muted)]">
-                <span className="font-bold text-[var(--color-moncasa-text)]">{currentUserEmail || 'Sin sesión'}</span>
+            <div className="flex w-full flex-wrap gap-2 text-sm font-semibold text-[var(--color-moncasa-text-weak)] lg:w-auto lg:justify-end">
+              <div className="w-full rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] px-3 py-2 text-xs text-[var(--color-moncasa-muted)] sm:w-auto sm:rounded-full sm:px-4">
+                <span className="break-all font-bold text-[var(--color-moncasa-text)]">{currentUserEmail || 'Sin sesión'}</span>
                 <span className="mx-2 text-[var(--color-moncasa-muted-strong)]">·</span>
                 <span>{currentUserRoleLabel}</span>
               </div>
-              <Link href="/productos" className="rounded-full border border-[var(--color-moncasa-border)] px-4 py-2 transition hover:bg-[var(--color-moncasa-hover)]">
+              <Link href="/productos" className="w-full rounded-full border border-[var(--color-moncasa-border)] px-4 py-2 text-center transition hover:bg-[var(--color-moncasa-hover)] sm:w-auto">
                 Ver catálogo
               </Link>
               <button
@@ -1624,7 +1624,7 @@ export default function AdminPage() {
                   await supabase.auth.signOut();
                   router.replace('/login');
                 }}
-                className="rounded-full bg-[#FE9A01] px-4 py-2 font-bold text-[#0A1116] transition hover:brightness-95"
+                className="w-full rounded-full bg-[#FE9A01] px-4 py-2 text-center font-bold text-[#0A1116] transition hover:brightness-95 sm:w-auto"
               >
                 Cerrar sesión
               </button>
@@ -1633,11 +1633,11 @@ export default function AdminPage() {
         </header>
 
         {/* TABS */}
-        <div className="flex border-b border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] overflow-x-auto">
+        <div className="flex overflow-x-auto border-b border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)]">
           <button
             type="button"
             onClick={() => setActiveTab('productos')}
-            className={`px-6 py-4 text-center font-bold transition whitespace-nowrap ${
+            className={`whitespace-nowrap px-4 py-3 text-center text-sm font-bold transition sm:px-6 sm:py-4 ${
               activeTab === 'productos'
                 ? 'border-b-2 border-[#FE9A01] text-[#FE9A01]'
                 : 'text-[var(--color-moncasa-muted)] hover:text-[var(--color-moncasa-text)]'
@@ -1648,7 +1648,7 @@ export default function AdminPage() {
           <button
             type="button"
             onClick={() => setActiveTab('mensajes')}
-            className={`px-6 py-4 text-center font-bold transition whitespace-nowrap ${
+            className={`whitespace-nowrap px-4 py-3 text-center text-sm font-bold transition sm:px-6 sm:py-4 ${
               activeTab === 'mensajes'
                 ? 'border-b-2 border-[#FE9A01] text-[#FE9A01]'
                 : 'text-[var(--color-moncasa-muted)] hover:text-[var(--color-moncasa-text)]'
@@ -1659,7 +1659,7 @@ export default function AdminPage() {
           <button
             type="button"
             onClick={() => setActiveTab('auditoria')}
-            className={`px-6 py-4 text-center font-bold transition whitespace-nowrap ${
+            className={`whitespace-nowrap px-4 py-3 text-center text-sm font-bold transition sm:px-6 sm:py-4 ${
               activeTab === 'auditoria'
                 ? 'border-b-2 border-[#FE9A01] text-[#FE9A01]'
                 : 'text-[var(--color-moncasa-muted)] hover:text-[var(--color-moncasa-text)]'
@@ -1670,7 +1670,7 @@ export default function AdminPage() {
           <button
             type="button"
             onClick={() => setActiveTab('configuracion')}
-            className={`px-6 py-4 text-center font-bold transition whitespace-nowrap ${
+            className={`whitespace-nowrap px-4 py-3 text-center text-sm font-bold transition sm:px-6 sm:py-4 ${
               activeTab === 'configuracion'
                 ? 'border-b-2 border-[#FE9A01] text-[#FE9A01]'
                 : 'text-[var(--color-moncasa-muted)] hover:text-[var(--color-moncasa-text)]'
@@ -1681,7 +1681,7 @@ export default function AdminPage() {
           <button
             type="button"
             onClick={() => setActiveTab('seguridad')}
-            className={`px-6 py-4 text-center font-bold transition whitespace-nowrap ${
+            className={`whitespace-nowrap px-4 py-3 text-center text-sm font-bold transition sm:px-6 sm:py-4 ${
               activeTab === 'seguridad'
                 ? 'border-b-2 border-[#FE9A01] text-[#FE9A01]'
                 : 'text-[var(--color-moncasa-muted)] hover:text-[var(--color-moncasa-text)]'
@@ -1915,7 +1915,7 @@ export default function AdminPage() {
 
         {/* CONTENIDO PRINCIPAL - TAB PRODUCTOS */}
         {activeTab === 'productos' && (
-          <section className="grid gap-6 px-6 py-8 lg:grid-cols-[0.9fr_1.1fr] sm:px-8">
+          <section className="grid gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
             {/* FORMULARIO */}
             <div className="rounded-[1.75rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-6">
               <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#FE9A01]">Agregar producto</p>
@@ -2134,7 +2134,7 @@ export default function AdminPage() {
                     💡 Arrastra tarjetas para reordenar. Los destacados siempre van primero.
                   </p>
                 </div>
-                <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   <button
                     type="button"
                     onClick={() => void loadProducts()}
@@ -2291,7 +2291,7 @@ export default function AdminPage() {
                           <span className="text-xs text-[var(--color-moncasa-muted-strong)] font-medium">📭 Sin imagen</span>
                         )}
 
-                        <div className="grid grid-cols-2 gap-2 mt-2">
+                        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                           <button
                             type="button"
                             onClick={() => void handleToggleActive(product)}
@@ -2347,7 +2347,7 @@ export default function AdminPage() {
 
         {/* CONTENIDO PRINCIPAL - TAB MENSAJES */}
         {activeTab === 'mensajes' && (
-          <section className="px-6 py-8 sm:px-8">
+          <section className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             <div className="mb-8">
               <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#FE9A01]">Mensajes de contacto</p>
               <h2 className="mt-2 text-4xl font-black text-[var(--color-moncasa-text)]">Bandeja de entrada</h2>
@@ -2484,7 +2484,7 @@ export default function AdminPage() {
 
         {/* CONTENIDO PRINCIPAL - TAB AUDITORIA */}
         {activeTab === 'auditoria' && (
-          <section className="px-6 py-8 sm:px-8">
+          <section className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#FE9A01]">Auditoría</p>
@@ -2596,7 +2596,7 @@ export default function AdminPage() {
 
         {/* CONTENIDO PRINCIPAL - TAB CONFIGURACIÓN */}
         {activeTab === 'configuracion' && (
-          <section className="px-6 py-8 sm:px-8">
+          <section className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             <div className="mb-6">
               <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#FE9A01]">Configuración</p>
               <h2 className="mt-2 text-3xl font-black text-[var(--color-moncasa-text)]">Gestiona tu sitio</h2>
@@ -2610,7 +2610,7 @@ export default function AdminPage() {
 
         {/* CONTENIDO PRINCIPAL - TAB SEGURIDAD */}
         {activeTab === 'seguridad' && (
-          <section className="grid gap-6 px-6 py-8 lg:grid-cols-2 sm:px-8">
+          <section className="grid gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:grid-cols-2 lg:px-8">
             <div className="rounded-[1.5rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-6">
               <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#FE9A01]">Roles</p>
               <h2 className="mt-2 text-2xl font-black text-[var(--color-moncasa-text)]">Gestión de admins</h2>
@@ -2691,12 +2691,12 @@ export default function AdminPage() {
                   Guardar
                 </button>
               </div>
-              <div className="mt-2 flex justify-end">
+              <div className="mt-2 flex justify-stretch sm:justify-end">
                 <button
                   type="button"
                   onClick={() => void handleInviteAccess(newAdminEmail)}
                   disabled={!canManageRoles || !newAdminEmail.trim() || invitingEmail === newAdminEmail.trim().toLowerCase()}
-                  className="rounded-xl border border-[var(--color-moncasa-border)] px-4 py-2 text-xs font-semibold text-[var(--color-moncasa-text)] transition hover:bg-[var(--color-moncasa-hover)] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-xl border border-[var(--color-moncasa-border)] px-4 py-2 text-xs font-semibold text-[var(--color-moncasa-text)] transition hover:bg-[var(--color-moncasa-hover)] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                 >
                   {invitingEmail === newAdminEmail.trim().toLowerCase() ? 'Enviando...' : 'Enviar invitación al correo'}
                 </button>
@@ -2833,7 +2833,7 @@ export default function AdminPage() {
                 Crea snapshots del catálogo y restáuralos cuando necesites.
               </p>
 
-              <div className="mt-4 flex gap-2">
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                 <input
                   value={backupName}
                   onChange={(event) => setBackupName(event.target.value)}
@@ -2844,7 +2844,7 @@ export default function AdminPage() {
                   type="button"
                   onClick={() => void handleCreateBackup()}
                   disabled={!canManageBackups}
-                  className="rounded-xl bg-[#FE9A01] px-4 py-2 text-sm font-bold text-[#0A1116] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-xl bg-[#FE9A01] px-4 py-2 text-sm font-bold text-[#0A1116] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                 >
                   Crear
                 </button>

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
   --color-moncasa-orange: #fe9a01;
   --color-moncasa-gold: #ffb52d;
   --color-moncasa-dark: #0a1116;
@@ -19,20 +19,6 @@
   --color-moncasa-inverse-surface-soft: #111a21;
   --color-moncasa-inverse-text: #f5f7fa;
   --color-moncasa-inverse-muted: rgba(255, 255, 255, 0.72);
-}
-
-html[data-theme='dark'] {
-  color-scheme: dark;
-  --color-moncasa-page-bg: #0a1116;
-  --color-moncasa-surface: #111a21;
-  --color-moncasa-surface-soft: #18222b;
-  --color-moncasa-border: rgba(255, 255, 255, 0.12);
-  --color-moncasa-text: #f5f7fa;
-  --color-moncasa-text-weak: #e5e7eb;
-  --color-moncasa-muted: rgba(255, 255, 255, 0.72);
-  --color-moncasa-muted-strong: rgba(255, 255, 255, 0.56);
-  --color-moncasa-hover: rgba(255, 255, 255, 0.08);
-  --color-moncasa-shadow: rgba(0, 0, 0, 0.28);
 }
 
 html[data-theme='light'] {

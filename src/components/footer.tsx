@@ -150,11 +150,6 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/nosotros" className="transition hover:text-[#FE9A01] hover:underline">
-                  Sobre nosotros
-                </Link>
-              </li>
-              <li>
                 <Link href="/contacto" className="transition hover:text-[#FE9A01] hover:underline">
                   Formulario de contacto
                 </Link>

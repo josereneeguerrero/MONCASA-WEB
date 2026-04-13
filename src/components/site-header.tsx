@@ -6,11 +6,11 @@ import AuthControls from '@/components/auth-controls';
 import MobileNavMenu from '@/components/mobile-nav-menu';
 
 type SiteHeaderProps = {
-  active?: 'inicio' | 'productos' | 'nosotros' | 'contacto';
+  active?: 'inicio' | 'productos' | 'contacto';
 };
 
 export default function SiteHeader({ active = 'inicio' }: SiteHeaderProps) {
-  const getNavClassName = (key: 'inicio' | 'productos' | 'nosotros' | 'contacto') => {
+  const getNavClassName = (key: 'inicio' | 'productos' | 'contacto') => {
     if (active === key) {
       return 'rounded-full bg-[#FE9A01] px-3 py-2 text-[#0A1116] lg:px-4';
     }
@@ -34,7 +34,6 @@ export default function SiteHeader({ active = 'inicio' }: SiteHeaderProps) {
         <nav aria-label="Principal" className="hidden items-center justify-center gap-1 overflow-x-auto whitespace-nowrap text-xs font-semibold lg:flex lg:gap-2 lg:text-sm">
           <Link href="/" className={getNavClassName('inicio')}>INICIO</Link>
           <Link href="/productos" className={getNavClassName('productos')}>PRODUCTOS</Link>
-          <Link href="/nosotros" className={getNavClassName('nosotros')}>NOSOTROS</Link>
           <Link href="/contacto" className={getNavClassName('contacto')}>CONTACTO</Link>
         </nav>
 

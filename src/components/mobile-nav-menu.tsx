@@ -48,13 +48,6 @@ export default function MobileNavMenu() {
                 PRODUCTOS
               </Link>
               <Link
-                href="/nosotros"
-                className="rounded-xl px-3 py-2.5 text-sm font-semibold text-[var(--color-moncasa-text-weak)] transition hover:bg-[var(--color-moncasa-hover)]"
-                onClick={() => setIsOpen(false)}
-              >
-                NOSOTROS
-              </Link>
-              <Link
                 href="/contacto"
                 className="rounded-xl px-3 py-2.5 text-sm font-semibold text-[var(--color-moncasa-text-weak)] transition hover:bg-[var(--color-moncasa-hover)]"
                 onClick={() => setIsOpen(false)}

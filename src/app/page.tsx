@@ -312,56 +312,6 @@ export default async function Home() {
               ))}
             </div>
           </section>
-
-            <section id="nosotros" className="mt-16 rounded-[2rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] p-8 sm:p-10 moncasa-fade-in-up">
-              <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
-                <div>
-                  <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#FE9A01]">Sobre nosotros</p>
-                  <h2 className="mt-2 text-4xl font-black text-[var(--color-moncasa-text)]">Servicio confiable, soluciones rápidas</h2>
-                  <p className="mt-4 text-lg leading-8 text-[var(--color-moncasa-muted)]">
-                    Ofrecemos soluciones integrales para proyectos de construcción y mejoramiento del hogar con enfoque en disponibilidad, confianza y atención profesional. Somos tu ferretería de confianza en San Lorenzo.
-                  </p>
-
-                  <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4 hover:bg-[#FE9A01]/5 transition">
-                      <p className="text-lg font-bold text-[var(--color-moncasa-text)]">Precisión</p>
-                      <p className="mt-1 text-sm text-[var(--color-moncasa-muted)]">Productos selectos y asesoría técnica exacta</p>
-                    </div>
-                    <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4 hover:bg-[#FE9A01]/5 transition">
-                      <p className="text-lg font-bold text-[var(--color-moncasa-text)]">Rapidez</p>
-                      <p className="mt-1 text-sm text-[var(--color-moncasa-muted)]">Servicio rápido y atención inmediata</p>
-                    </div>
-                    <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4 hover:bg-[#FE9A01]/5 transition">
-                      <p className="text-lg font-bold text-[var(--color-moncasa-text)]">Confianza</p>
-                      <p className="mt-1 text-sm text-[var(--color-moncasa-muted)]">Relaciones duraderas con nuestros clientes</p>
-                    </div>
-                    <div className="rounded-xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface-soft)] p-4 hover:bg-[#FE9A01]/5 transition">
-                      <p className="text-lg font-bold text-[var(--color-moncasa-text)]">Presencia Local</p>
-                      <p className="mt-1 text-sm text-[var(--color-moncasa-muted)]">Ubicación física en San Lorenzo</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-[var(--color-moncasa-border)] bg-gradient-to-br from-[#FE9A01]/15 to-[#FE9A01]/5 p-8 flex flex-col justify-center moncasa-float">
-                  <div className="space-y-4">
-                    <div className="text-center">
-                      <p className="text-5xl font-black text-[#FE9A01]">15+</p>
-                      <p className="mt-2 text-sm text-[var(--color-moncasa-muted)]">Años en el mercado</p>
-                    </div>
-                    <div className="h-px bg-gradient-to-r from-transparent via-[#FE9A01]/30 to-transparent" />
-                    <div className="text-center">
-                      <p className="text-5xl font-black text-[#FE9A01]">1000+</p>
-                      <p className="mt-2 text-sm text-[var(--color-moncasa-muted)]">Clientes satisfechos</p>
-                    </div>
-                    <div className="h-px bg-gradient-to-r from-transparent via-[#FE9A01]/30 to-transparent" />
-                    <div className="text-center">
-                      <p className="text-5xl font-black text-[#FE9A01]">24/7</p>
-                      <p className="mt-2 text-sm text-[var(--color-moncasa-muted)]">Disponibilidad</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
         </main>
 
           <footer id="contacto" className="mt-16">

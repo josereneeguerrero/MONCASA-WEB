@@ -3,10 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import ThemeScript from "@/components/theme-script";
 import GoogleAnalytics from "@/components/google-analytics";
 import AppShellWithClerk from "@/components/app-shell-with-clerk";
-import ThemeToggle from "@/components/theme-toggle";
 import FloatingCartVisibility from "@/components/floating-cart-visibility";
 import WhatsAppFloat from "@/components/whatsapp-float";
 import NewsletterModal from "@/components/newsletter-modal";
@@ -62,10 +60,8 @@ export default function RootLayout({
   const clerkReady = Boolean(clerkPublishableKey);
 
   return (
-    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`} suppressHydrationWarning>
-      <head>
-        <ThemeScript />
-      </head>
+    <html lang="es" data-theme="light" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+      <head />
       <body className="min-h-full flex flex-col bg-[var(--color-moncasa-page-bg)] text-[var(--color-moncasa-text)]">
         {clerkReady ? (
           <ClerkProvider publishableKey={clerkPublishableKey}>
@@ -78,7 +74,6 @@ export default function RootLayout({
               <FloatingCartVisibility />
               <WhatsAppFloat />
             </CartProvider>
-            <ThemeToggle />
           </>
         )}
         <NewsletterModal />
