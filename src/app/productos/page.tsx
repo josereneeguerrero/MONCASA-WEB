@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
-import BrandLogo from '@/components/brand-logo';
+import SiteHeader from '@/components/site-header';
 import Footer from '@/components/footer';
 import { ProductsClient } from '@/components/products-client';
 
@@ -113,21 +113,7 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
   return (
     <main className="min-h-screen bg-[var(--color-moncasa-page-bg)] px-4 py-4 sm:px-6 lg:px-8">
       <div className="mx-auto min-h-[calc(100vh-2rem)] max-w-7xl overflow-hidden rounded-[2rem] border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] shadow-[0_18px_60px_var(--color-moncasa-shadow)]">
-        <header className="sticky top-0 z-50 border-b border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] px-5 py-4 sm:px-8">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <BrandLogo className="h-12 w-12 rounded-2xl border border-[var(--color-moncasa-border)] bg-[var(--color-moncasa-surface)] object-cover p-1 shadow-[0_8px_24px_var(--color-moncasa-shadow)]" />
-              <p className="text-[10px] font-bold tracking-[0.35em] text-[#FE9A01]">FERRETERIA MONCASA</p>
-            </Link>
-
-            <nav aria-label="Principal" className="flex flex-wrap items-center gap-2 text-sm font-semibold">
-              <Link href="/" className="rounded-full px-4 py-2 text-[var(--color-moncasa-text-weak)] transition hover:bg-[var(--color-moncasa-hover)]">INICIO</Link>
-              <Link href="/productos" className="rounded-full bg-[#FE9A01] px-4 py-2 text-[#0A1116]">PRODUCTOS</Link>
-              <Link href="/nosotros" className="rounded-full px-4 py-2 text-[var(--color-moncasa-text-weak)] transition hover:bg-[var(--color-moncasa-hover)]">NOSOTROS</Link>
-              <Link href="/contacto" className="rounded-full px-4 py-2 text-[var(--color-moncasa-text-weak)] transition hover:bg-[var(--color-moncasa-hover)]">CONTACTO</Link>
-            </nav>
-          </div>
-        </header>
+        <SiteHeader active="productos" />
 
         <section className="px-5 py-8 sm:px-8 sm:py-10">
           <p className="text-sm font-bold uppercase tracking-[0.35em] text-[#FE9A01]">Productos</p>
