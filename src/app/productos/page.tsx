@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { supabase } from '@/lib/supabase';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import BrandLogo from '@/components/brand-logo';
 import Footer from '@/components/footer';
 import { ProductsClient } from '@/components/products-client';
@@ -98,9 +98,12 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
   const currentPage = Math.max(1, Number(params.page ?? '1') || 1);
 
   const productsTable = process.env.NEXT_PUBLIC_SUPABASE_PRODUCTS_TABLE ?? 'productos';
-  const { data } = await supabase.from(productsTable).select('*').limit(1000);
+  let allProducts: ReturnType<typeof getProducts> = [];
 
-  const allProducts = getProducts((Array.isArray(data) ? data : []) as ProductRow[]);
+  if (isSupabaseConfigured && supabase) {
+    const { data } = await supabase.from(productsTable).select('*').limit(1000);
+    allProducts = getProducts((Array.isArray(data) ? data : []) as ProductRow[]);
+  }
   const totalItems = allProducts.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
   const safePage = Math.min(currentPage, totalPages);

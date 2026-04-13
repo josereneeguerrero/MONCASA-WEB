@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import BrandLogo from '@/components/brand-logo';
 import Footer from '@/components/footer';
@@ -145,28 +145,34 @@ export default async function Home() {
 
   let products = fallbackProducts;
 
-  const { data, error } = await supabase.from(productsTable).select('*').limit(6);
+  if (isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase.from(productsTable).select('*').limit(6);
 
-  if (!error && Array.isArray(data)) {
-    products = resolveProducts(data as ProductRow[]);
+    if (!error && Array.isArray(data)) {
+      products = resolveProducts(data as ProductRow[]);
+    }
   }
 
-  const { data: rawConfig } = await supabase
-    .from('configuracion_sitio')
-    .select('clave,valor')
-    .in('clave', [
-      'hero_subtitulo',
-      'hero_titulo',
-      'hero_cta_text',
-      'hero_cta_link',
-      'banner_activo',
-      'banner_texto',
-      'banner_tipo',
-      'banner_link',
-      'promos_home',
-    ]);
+  let config = new Map<string, string>();
 
-  const config = toConfigMap((Array.isArray(rawConfig) ? rawConfig : []) as ConfigRow[]);
+  if (isSupabaseConfigured && supabase) {
+    const { data: rawConfig } = await supabase
+      .from('configuracion_sitio')
+      .select('clave,valor')
+      .in('clave', [
+        'hero_subtitulo',
+        'hero_titulo',
+        'hero_cta_text',
+        'hero_cta_link',
+        'banner_activo',
+        'banner_texto',
+        'banner_tipo',
+        'banner_link',
+        'promos_home',
+      ]);
+
+    config = toConfigMap((Array.isArray(rawConfig) ? rawConfig : []) as ConfigRow[]);
+  }
 
   const heroSubtitulo = config.get('hero_subtitulo') || 'Bienvenido';
   const heroTitulo = config.get('hero_titulo') || 'Tu aliado confiable en construcción y hogar';

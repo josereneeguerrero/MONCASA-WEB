@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { supabase } from './supabase';
+import { isSupabaseConfigured, supabase } from './supabase';
 
 export type ConfiguracionType = 'texto' | 'json' | 'numero' | 'url' | 'email';
 
@@ -34,6 +34,12 @@ export function useConfig() {
 
   const loadConfig = useCallback(async () => {
     try {
+      if (!isSupabaseConfigured || !supabase) {
+        setError('Supabase no está configurado en este entorno.');
+        setLoading(false);
+        return;
+      }
+
       // Revisar si el cache sigue siendo válido
       const now = Date.now();
       if (cacheTimestamp && now - cacheTimestamp < CACHE_DURATION) {
@@ -100,6 +106,10 @@ export function useConfig() {
 }
 
 export async function getAllConfig(): Promise<ConfigItem[]> {
+  if (!isSupabaseConfigured || !supabase) {
+    return [];
+  }
+
   const { data, error } = await supabase
     .from('configuracion_sitio')
     .select('*')
@@ -114,6 +124,10 @@ export async function getAllConfig(): Promise<ConfigItem[]> {
 }
 
 export async function updateConfigValue(clave: string, valor: string, email?: string): Promise<boolean> {
+  if (!isSupabaseConfigured || !supabase) {
+    return false;
+  }
+
   const { error } = await supabase
     .from('configuracion_sitio')
     .update({ valor, updated_at: new Date().toISOString(), updated_by: email })

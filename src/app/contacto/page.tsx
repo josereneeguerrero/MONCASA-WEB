@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import BrandLogo from '@/components/brand-logo';
 import Footer from '@/components/footer';
 import { useConfig } from '@/lib/useConfig';
@@ -65,18 +65,20 @@ export default function ContactoPage() {
       // Intentar guardar en Supabase
       const contactosTable = process.env.NEXT_PUBLIC_SUPABASE_CONTACTS_TABLE ?? 'contactos';
 
-      const { error } = await supabase.from(contactosTable).insert({
-        nombre: parsed.data.nombre.trim(),
-        email: parsed.data.email.trim(),
-        telefono: parsed.data.telefono?.trim() || null,
-        asunto: parsed.data.asunto?.trim() || null,
-        mensaje: parsed.data.mensaje.trim(),
-        created_at: new Date().toISOString(),
-      });
+      if (isSupabaseConfigured && supabase) {
+        const { error } = await supabase.from(contactosTable).insert({
+          nombre: parsed.data.nombre.trim(),
+          email: parsed.data.email.trim(),
+          telefono: parsed.data.telefono?.trim() || null,
+          asunto: parsed.data.asunto?.trim() || null,
+          mensaje: parsed.data.mensaje.trim(),
+          created_at: new Date().toISOString(),
+        });
 
-      if (error) {
-        console.warn('Error al guardar contacto en DB:', error);
-        // Continuamos de todas formas, mostraremos éxito al usuario
+        if (error) {
+          console.warn('Error al guardar contacto en DB:', error);
+          // Continuamos de todas formas, mostraremos éxito al usuario
+        }
       }
 
       // Éxito

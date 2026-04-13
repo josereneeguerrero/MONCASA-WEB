@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useClerk, useUser } from '@clerk/nextjs';
-import { supabase } from '@/lib/supabase';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import BrandLogo from '@/components/brand-logo';
 import ConfigPanel from '@/components/config-panel';
 import { productSchema } from '@/lib/validation';
@@ -404,6 +404,10 @@ export default function AdminPage() {
 
   const removeImageFromStorage = useCallback(
     async (publicUrl: string) => {
+      if (!isSupabaseConfigured || !supabase) {
+        return false;
+      }
+
       const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
       if (!projectUrl || !publicUrl) {
@@ -532,6 +536,11 @@ export default function AdminPage() {
   );
 
   const loadProducts = useCallback(async () => {
+    if (!isSupabaseConfigured || !supabase) {
+      setProducts([]);
+      return;
+    }
+
     const { data, error } = await supabase.from(productsTable).select('*').limit(100);
 
     if (error) {
@@ -561,6 +570,11 @@ export default function AdminPage() {
   }, [productsTable]);
 
   const loadMensajes = useCallback(async () => {
+    if (!isSupabaseConfigured || !supabase) {
+      setMensajes([]);
+      return;
+    }
+
     const { data, error } = await supabase
       .from('contactos')
       .select('*')
@@ -587,6 +601,11 @@ export default function AdminPage() {
   }, []);
 
   const loadAuditLogs = useCallback(async () => {
+    if (!isSupabaseConfigured || !supabase) {
+      setAuditLogs([]);
+      return;
+    }
+
     const { data, error } = await supabase
       .from(auditLogsTable)
       .select('*')
@@ -620,6 +639,11 @@ export default function AdminPage() {
   }, []);
 
   const loadAdminRoles = useCallback(async () => {
+    if (!isSupabaseConfigured || !supabase) {
+      setAdminRoles([]);
+      return;
+    }
+
     const { data, error } = await supabase
       .from(rolesTable)
       .select('*')
@@ -642,6 +666,11 @@ export default function AdminPage() {
   }, [rolesTable]);
 
   const loadBackups = useCallback(async () => {
+    if (!isSupabaseConfigured || !supabase) {
+      setBackups([]);
+      return;
+    }
+
     const { data, error } = await supabase
       .from(backupsTable)
       .select('*')

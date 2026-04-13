@@ -1,17 +1,21 @@
 import type { Metadata } from 'next';
-import { supabase } from '@/lib/supabase';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 
 export async function generateMetadata(): Promise<Metadata> {
   const fallbackAddress = 'Barrio Mongollano, San Lorenzo, Valle 02501';
 
-  const { data } = await supabase
-    .from('configuracion_sitio')
-    .select('clave,valor')
-    .in('clave', ['direccion_completa']);
+  let address = fallbackAddress;
 
-  const address = Array.isArray(data)
-    ? String(data.find((item) => item.clave === 'direccion_completa')?.valor || fallbackAddress)
-    : fallbackAddress;
+  if (isSupabaseConfigured && supabase) {
+    const { data } = await supabase
+      .from('configuracion_sitio')
+      .select('clave,valor')
+      .in('clave', ['direccion_completa']);
+
+    address = Array.isArray(data)
+      ? String(data.find((item) => item.clave === 'direccion_completa')?.valor || fallbackAddress)
+      : fallbackAddress;
+  }
 
   return {
     title: 'Contacto',
